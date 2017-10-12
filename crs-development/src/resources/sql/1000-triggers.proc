@@ -1,5 +1,15 @@
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `BU_Ticket` BEFORE UPDATE ON `Ticket` FOR EACH ROW BEGIN
-        IF NEW.Admin_NH2 = '' THEN
-SET NEW.Admin_NH2 = NULL;
-END IF;
-    END */
+At the login to mysql and 'USE crsdb;'
+
+mysql> 	DELIMIER */
+
+// Copy and paste the following after mysql prompt and return ...
+
+mysql> 	CREATE TRIGGER `BU_Ticket` BEFORE UPDATE ON `Ticket` FOR EACH ROW BEGIN
+		IF NEW.Admin_NH2 = '' THEN
+		SET NEW.Admin_NH2 = NULL;
+		END IF;
+		END*/
+		
+mysql>  DELIMITER ;
+
+(exit)
