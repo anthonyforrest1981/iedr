@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<schema targetNamespace="http://www.domainregistry.ie/ieapi-registrantTransferSellRequest-1.8"
+    xmlns:registrantTransferSellRequest="http://www.domainregistry.ie/ieapi-registrantTransferSellRequest-1.8"
+    xmlns:ieapi="http://www.domainregistry.ie/ieapi-1.8"
+    xmlns:ieapicom="http://www.domainregistry.ie/ieapicom-1.8"
+    xmlns="http://www.w3.org/2001/XMLSchema"
+    elementFormDefault="qualified">
+
+    <import namespace="http://www.domainregistry.ie/ieapicom-1.8"
+        schemaLocation="ieapicom-1.8.xsd" />
+    <import namespace="http://www.domainregistry.ie/ieapi-1.8"
+        schemaLocation="ieapi-1.8.xsd" />
+
+    <annotation>
+        <documentation>
+            IEAPI Protocol v1.8 registrant transfer management schema (sell requests)
+        </documentation>
+    </annotation>
+
+    <element name="create" type="registrantTransferSellRequest:createType" />
+    <element name="query" type="registrantTransferSellRequest:queryType" />
+    <element name="info" type="registrantTransferSellRequest:idType" />
+
+    <complexType name="createType">
+        <sequence>
+            <element name="domainName" type="ieapicom:domainNameType"/>
+            <element name="authCode" type="string"/>
+            <element name="method" type="ieapicom:paymentMethodType"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="queryType">
+        <attribute name="page" type="int" use="optional" default="1" />
+    </complexType>
+
+    <complexType name="idType">
+        <sequence>
+            <element name="id" type="unsignedLong"/>
+        </sequence>
+    </complexType>
+
+    <element name="resData" type="registrantTransferSellRequest:resDataType" />
+    <element name="requestData" type="registrantTransferSellRequest:requestType" />
+    <element name="infoData" type="registrantTransferSellRequest:infoDataType" />
+
+    <complexType name="resDataType">
+        <sequence>
+            <element name="page" type="int" />
+            <element name="totalPages" type="int" />
+            <element name="request" type="registrantTransferSellRequest:requestType" maxOccurs="unbounded"
+                minOccurs="0" />
+        </sequence>
+    </complexType>
+
+    <complexType name="requestType">
+        <sequence>
+            <element name="id" type="long"/>
+            <element name="domainName" type="ieapicom:domainNameType"/>
+            <element name="holder" type="ieapicom:holderType"/>
+            <element name="crDate" type="date"/>
+            <element name="compDate" type="date"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="infoDataType">
+        <sequence>
+            <element name="id" type="long"/>
+            <element name="domainName" type="ieapicom:domainNameType"/>
+            <element name="holder" type="ieapicom:holderType"/>
+            <element name="crDate" type="date"/>
+            <element name="compDate" type="date"/>
+            <element name="contact" type="ieapicom:contactType"/>
+        </sequence>
+    </complexType>
+
+</schema>

@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "sql-map-2.dtd">
+
+<sqlMap namespace="reports">
+
+    <resultMap id="totalDomains" class="pl.nask.crs.reports.TotalDomains">
+        <result property="billingNH" column="billingNH"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="accountName" column="accountName"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="domainCount" column="domainCount" />
+    </resultMap>
+    <resultMap id="totalDomainsPerDate" class="pl.nask.crs.reports.TotalDomainsPerDate"
+        extends="totalDomains">
+        <result property="date" column="date"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler" />
+        <result property="domainClass" resultMap="entities.entityClass" />
+        <result property="domainCategory" resultMap="entities.entityCategory" />
+    </resultMap>
+    <resultMap id="domainsPerClass" class="pl.nask.crs.reports.DomainsPerClass">
+        <result property="domainClass" resultMap="entities.entityClass" />
+        <result property="domainCategory" resultMap="entities.entityCategory" />
+        <result property="domainCount" column="domainCount" />
+        <result property="accountName" column="accountName"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="billNHId" column="billNHId"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+    </resultMap>
+
+    <sql id="totalDomainCriteria">
+        WHERE
+        A.A_Status = 'Active'
+        AND
+        A.A_Number >= 100
+        <dynamic>
+            <isNotEmpty prepend="and"
+                property="criteria.excludedRegistrarsNic">
+                A.Billing_NH NOT IN
+                <iterate property="criteria.excludedRegistrarsNic"
+                    open="(" close=")" conjunction=",">
+                    #criteria.excludedRegistrarsNic[],handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#
+                </iterate>
+            </isNotEmpty>
+        </dynamic>
+    </sql>
+
+    <select id="getTotalDomains" resultMap="totalDomains">
+        (SELECT
+        COUNT(DISTINCT(D.D_Name)) as domainCount,
+        A.Billing_NH as billingNH,
+        A.A_Name as accountName
+        FROM
+        Account A
+        LEFT JOIN Domain D
+        ON (D.A_Number = A.A_Number)
+        <include refid="totalDomainCriteria" />
+        GROUP BY A.A_Number
+        <include refid="common.sortFrag" />
+        <include refid="common.limitFrag" />
+        )
+        UNION ALL
+        (SELECT
+        COUNT(DISTINCT(D.D_Name)) as domainCount,
+        'Direct Registrants' as billingNH,
+        NULL as accountName
+        FROM
+        Account A
+        LEFT JOIN Domain D ON (D.A_Number = A.A_Number)
+        WHERE
+        A.A_Number = 1
+        GROUP BY A.A_Number)
+    </select>
+
+    <select id="getTotalDomainsCount" resultClass="int">
+        SELECT
+        COUNT(DISTINCT A.A_Number) + 1 as CNT
+        FROM
+        Account A
+        <include refid="totalDomainCriteria" />
+    </select>
+
+    <sql id="criteria">
+        <dynamic>
+            <isNotNull prepend="and" property="criteria.registrationFrom">
+                D.D_Reg_TS >=
+                #criteria.registrationFrom,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.registrationTo">
+                D.D_Reg_TS <![CDATA[<=]]>
+                #criteria.registrationTo,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isEqual prepend="and" property="criteria.customerType"
+                compareValue="Direct">
+                D.A_Number = 1
+            </isEqual>
+            <isEqual prepend="and" property="criteria.customerType"
+                compareValue="Registrar">
+                D.A_Number != 1
+            </isEqual>
+            <isNotNull prepend="and" property="criteria.accountId">
+                D.A_Number =
+                #criteria.accountId#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.holderClassId">
+                D.Class_Id = #criteria.holderClassId#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.holderCategoryId">
+                D.Category_Id = #criteria.holderCategoryId#
+            </isNotNull>
+        </dynamic>
+    </sql>
+
+    <select id="getDomainsPerMonth" resultMap="totalDomainsPerDate">
+        SELECT
+        COUNT(DISTINCT(D.D_Name)) as domainCount,
+        C.Contact_NH as billingNH,
+        NH.NH_Name as accountName,
+        D.D_Reg_TS as date,
+        D.Class_Id as classId,
+        CL.name as className,
+        D.Category_Id as categoryId,
+        CT.name as categoryName
+        FROM Domain D
+        LEFT JOIN Contact C ON (D.D_Name = C.D_Name)
+        LEFT JOIN NicHandle NH ON (C.Contact_NH = NH.Nic_Handle)
+        LEFT JOIN Class as CL ON (CL.id = D.Class_Id)
+        LEFT JOIN Category as CT ON (CT.id = D.Category_Id)
+        WHERE C.Type = 'Billing'
+        <include refid="criteria" />
+        GROUP BY C.Contact_NH, DATE_FORMAT(date, '%Y %M'),
+        D.Class_Id, D.Category_Id
+        <include refid="common.sortFrag" />
+        <include refid="common.limitFrag" />
+    </select>
+
+    <select id="getDomainsPerMonthCount" resultClass="int">
+        SELECT
+        COUNT(*)
+        FROM (
+        SELECT
+        D.D_Reg_TS as date
+        FROM
+        Domain D
+        LEFT JOIN Contact C ON (D.D_Name = C.D_Name)
+        WHERE
+        C.Type = 'Billing'
+        <include refid="criteria" />
+        GROUP BY C.Contact_NH, DATE_FORMAT(date, '%Y %M'),
+        D.Class_Id, D.Category_Id
+        ) as total
+    </select>
+
+    <select id="getDomainsPerYear" resultMap="totalDomainsPerDate">
+        SELECT
+        COUNT(DISTINCT(D.D_Name)) as domainCount,
+        C.Contact_NH as billingNH,
+        NH.NH_Name as accountName,
+        D.D_Reg_TS as date,
+        D.Class_Id as classId,
+        CL.name as className,
+        D.Category_Id as categoryId,
+        CT.name as categoryName
+        FROM Domain D
+        LEFT JOIN Contact C ON (D.D_Name = C.D_Name)
+        LEFT JOIN NicHandle NH ON (C.Contact_NH = NH.Nic_Handle)
+        LEFT JOIN Class as CL ON (CL.id = D.Class_Id)
+        LEFT JOIN Category as CT ON (CT.id = D.Category_Id)
+        WHERE C.Type = 'Billing'
+        <include refid="criteria" />
+        GROUP BY C.Contact_NH, YEAR(date), D.Class_Id, D.Category_Id
+        <include refid="common.sortFrag" />
+        <include refid="common.limitFrag" />
+    </select>
+
+    <select id="getDomainsPerYearCount" resultClass="int">
+        SELECT
+        COUNT(*)
+        FROM (
+        SELECT
+        D.D_Reg_TS as date
+        FROM
+        Domain D
+        LEFT
+        JOIN Contact C ON (D.D_Name = C.D_Name)
+        WHERE
+        C.Type = 'Billing'
+        <include refid="criteria" />
+        GROUP BY C.Contact_NH, YEAR(date), D.Class_Id, D.Category_Id
+        ) as total
+    </select>
+
+    <select id="getTotalDomainsPerYear" resultMap="totalDomainsPerDate">
+        SELECT
+        COUNT(DISTINCT(D.D_Name)) as domainCount,
+        NULL as billingNH,
+        D.D_Reg_TS as date,
+        NULL as accountName,
+        NULL as classId,
+        NULL as className,
+        NULL as categoryId,
+        NULL as categoryName
+        FROM
+        Domain D
+        LEFT JOIN Contact C ON (D.D_Name = C.D_Name)
+        WHERE
+        C.Type = 'Billing'
+        <include refid="criteria" />
+        GROUP BY YEAR(date)
+        <include refid="common.sortFrag" />
+        <include refid="common.limitFrag" />
+    </select>
+
+    <select id="getTotalDomainsPerYearCount" resultClass="int">
+        SELECT
+        COUNT(*)
+        FROM (
+        SELECT
+        D.D_Reg_TS as date
+        FROM
+        Domain D
+        LEFT
+        JOIN Contact C ON (D.D_Name = C.D_Name)
+        WHERE
+        C.Type = 'Billing'
+        <include refid="criteria" />
+        GROUP BY YEAR(date)
+        ) as total
+    </select>
+
+    <select id="getTotalDomainsPerMonth" resultMap="totalDomainsPerDate">
+        SELECT
+        COUNT(DISTINCT(D.D_Name)) as domainCount,
+        NULL as
+        billingNH,
+        D.D_Reg_TS as date,
+        NULL as accountName,
+        NULL as classId,
+        NULL as className,
+        NULL as categoryId,
+        NULL as categoryName
+        FROM
+        Domain D
+        LEFT JOIN Contact C ON (D.D_Name = C.D_Name)
+        WHERE
+        C.Type = 'Billing'
+        <include refid="criteria" />
+        GROUP BY DATE_FORMAT(date, '%Y %M')
+        <include refid="common.sortFrag" />
+        <include refid="common.limitFrag" />
+    </select>
+
+    <select id="getTotalDomainsPerMonthCount" resultClass="int">
+        SELECT
+        COUNT(*)
+        FROM (
+        SELECT
+        D.D_Reg_TS as date
+        FROM
+        Domain D
+        LEFT
+        JOIN Contact C ON (D.D_Name = C.D_Name)
+        WHERE
+        C.Type = 'Billing'
+        <include refid="criteria" />
+        GROUP BY DATE_FORMAT(date, '%Y %M')
+        ) as total
+    </select>
+
+    <sql id="perClassCriteria">
+        <dynamic>
+            <isNotNull prepend="and" property="criteria.holderClassId">
+                D.Class_Id = #criteria.holderClassId#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.holderCategoryId">
+                D.Category_Id = #criteria.holderCategoryId#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.from">
+                D.D_Reg_TS >=
+                #criteria.from,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.to">
+                D.D_Reg_TS <![CDATA[<=]]>
+                #criteria.to,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.accountId">
+                A.A_Number=#criteria.accountId#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.billingNH">
+                A.Billing_NH=#criteria.billingNH,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#
+            </isNotNull>
+        </dynamic>
+    </sql>
+
+    <select id="getDomainsPerClass" resultMap="domainsPerClass">
+        SELECT
+        D.Class_Id as classId,
+        CL.name as className,
+        D.Category_Id as categoryId,
+        CT.name as categoryName,
+        COUNT(D.D_Name) as domainCount,
+        A.A_Name as accountName,
+        A.Billing_NH as billNHId
+        FROM Domain D
+        LEFT JOIN Class as CL ON (CL.id = D.Class_Id)
+        LEFT JOIN Category as CT ON (CT.id = D.Category_Id),
+        Account A
+        WHERE D.A_Number = A.A_Number
+        <include refid="perClassCriteria" />
+        GROUP BY D.Class_Id, D.Category_Id, accountName
+        <include refid="common.sortFrag" />
+        <include refid="common.limitFrag" />
+    </select>
+
+    <select id="getDomainsPerClassCount" resultClass="int">
+        SELECT
+        COUNT(*)
+        FROM (
+        SELECT
+        D.Class_Id as classId,
+        CL.name as className,
+        D.Category_Id as categoryId,
+        CT.name as categoryName,
+        COUNT(D.D_Name) as cunt,
+        A.A_Name as accountName
+        FROM Domain D
+        LEFT JOIN Class as CL ON (CL.id = D.Class_Id)
+        LEFT JOIN Category as CT ON (CT.id = D.Category_Id),
+        Account A
+        WHERE D.A_Number=A.A_Number
+        <include refid="perClassCriteria" />
+        GROUP BY D.Class_Id, D.Category_Id, accountName
+        ) as subQuery
+    </select>
+</sqlMap>

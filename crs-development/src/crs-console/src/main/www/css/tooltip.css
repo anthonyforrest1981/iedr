@@ -1,0 +1,22 @@
+.tooltip {
+    border: 1px solid #bfbfbf;
+    padding: 7px;
+    background: #f4f4f4;
+    width: inherit;
+    max-width: 300px;
+}
+
+.tooltip .idn-tooltip-info {
+    text-align: justify;
+    margin: 0;
+}
+
+.tooltip .idn-tooltip-punycode {
+    text-align: center;
+    margin: 0.5em 0 0 0;
+}
+
+.idn-tooltip-container {
+    position: relative;
+    display: inline-block;
+}

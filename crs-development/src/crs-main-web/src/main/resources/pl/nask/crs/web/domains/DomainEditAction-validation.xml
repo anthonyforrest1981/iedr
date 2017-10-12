@@ -1,0 +1,79 @@
+<!DOCTYPE validators PUBLIC "-//OpenSymphony Group//XWork Validator 1.0.2//EN"
+        "http://www.opensymphony.com/xwork/xwork-validator-1.0.2.dtd">
+<validators>
+    <field name="domainWrapper.domainHolder">
+        <field-validator type="requiredstring">
+            <message>You must enter a value for domain holder</message>
+        </field-validator>
+    </field>
+    <field name="domainWrapper.adminContact1">
+        <field-validator type="requiredstring">
+            <message>You must enter a value for an admin contact</message>
+        </field-validator>
+        <field-validator type="contact">
+            <message>Not a valid Nic Handle (does not exist)</message>
+        </field-validator>
+        <field-validator type="contactAccount">
+            <message>Not a valid Nic Handle (Account mismatch)</message>
+        </field-validator>
+    </field>
+    <!-- admin contact 2 is optional -->
+    <field name="domainWrapper.adminContact2">
+        <field-validator type="contact">
+            <message>Not a valid Nic Handle (does not exist)</message>
+        </field-validator>
+        <field-validator type="contactAccount">
+            <message>Not a valid Nic Handle (Account mismatch)</message>
+        </field-validator>
+    </field>
+    <field name="domainWrapper.techContact">
+        <field-validator type="requiredstring">
+            <message>You must enter a value for a tech contact</message>
+        </field-validator>
+        <field-validator type="contact">
+            <message>Not a valid Nic Handle (does not exist)</message>
+        </field-validator>
+        <field-validator type="contactAccount">
+            <message>Not a valid Nic Handle (Account mismatch)</message>
+        </field-validator>
+    </field>
+    <field name="domainWrapper">
+        <field-validator type="domainAdminContactDuplication">
+            <message>Duplicate admin contact</message>
+        </field-validator>
+    </field>
+    <field name="domainWrapper.dnsWrapper">
+        <field-validator type="domainNameserverCount">
+            <message>Wrong number of nameservers</message>
+        </field-validator>
+        <field-validator type="domainNameserverDuplication">
+            <message>Duplicate nameserver</message>
+        </field-validator>
+        <field-validator type="domainNameserverName">
+            <message>Not a valid nameserver name</message>
+        </field-validator>
+        <field-validator type="domainNameserverGlueRequired">
+            <message>Glue is required for this dns</message>
+        </field-validator>
+        <field-validator type="domainNameserverGlueNotAllowed">
+            <message>Glue is not allowed for this dns</message>
+        </field-validator>
+        <field-validator type="domainNameserverIp">
+            <message>Not a valid IP</message>
+        </field-validator>
+    </field>
+    <field name="domainWrapper.remark">
+        <field-validator type="requiredstring">
+            <message>You must enter a value for Hostmaster's Remark</message>
+        </field-validator>
+        <field-validator type="stringlength">
+            <param name="maxLength">2000</param>
+            <message>Maximum 2000 characters allowed</message>
+        </field-validator>
+    </field>
+    <field name="domainWrapper.holderCategory.id">
+        <field-validator type="category">
+            <message>Not a valid Class/Category</message>
+        </field-validator>
+    </field>
+</validators>

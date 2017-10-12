@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "sql-map-2.dtd">
+
+<sqlMap namespace="historicalNicHandle">
+
+    <resultMap id="internalHistoricalNicHandle"
+        class="pl.nask.crs.nichandle.dao.ibatis.objects.InternalHistoricalNicHandle"
+        groupBy="changeId">
+        <result property="changeId" column="changeId" />
+        <result property="histChangeDate" column="histChangeDate" />
+        <result property="changedByNicHandle" column="changedByNicHandle"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="nicHandleId" column="nicHandleId"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="name" column="name"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="accountNumber" column="accountNumber" />
+        <result property="companyName" column="companyName"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseEmptyStringAsNullTypeHandler" />
+        <result property="address" column="address"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="country" resultMap="country.countryResult" />
+        <result property="county" resultMap="country.countyResult" />
+        <result property="email" column="email"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="status" column="status"
+            typeHandler="pl.nask.crs.nichandle.dao.ibatis.handlers.NicHandleStatusHandler" />
+        <result property="statusChangeDate" column="statusChangeDate" />
+        <result property="registrationDate" column="registrationDate" />
+        <result property="changeDate" column="changeDate" />
+        <result property="billCInd" column="billCInd"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler" />
+        <result property="nicHandleRemark" column="nicHandleRemark"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="creator" column="creator"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="vatCategory" column="vatCategory"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="vatNo" column="vatNo"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="telecoms" resultMap="historicalNicHandle.telecoms" />
+        <result property="agreementSigned" column="agreementSigned"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler" />
+        <result property="ticketEdit" column="ticketEdit"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler" />
+    </resultMap>
+
+    <resultMap id="telecoms"
+        class="pl.nask.crs.nichandle.dao.ibatis.objects.Telecom">
+        <result property="number" column="Telecom_number"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="type" column="Telecom_type"
+            typeHandler="pl.nask.crs.nichandle.dao.ibatis.handlers.TelecomTypeHandler" />
+        <result property="order" column="Telecom_order" />
+    </resultMap>
+
+    <sql id="selectJoin">
+    <![CDATA[
+        SELECT
+            NH.Chng_ID as changeId,
+            NH.Nic_Handle as nicHandleId,
+            NH.NH_Name as name,
+            AH.A_Number as accountNumber,
+            NH.Co_Name as companyName,
+            NH.NH_Address as address,
+            Cntr.Id as countryId,
+            Cntr.Name as countryName,
+            Cntr.vat_category as countryVatCategory,
+            Cnt.Id as countyId,
+            Cnt.Name as countyName,
+            NH.NH_Email as email,
+            NH.NH_Status as status,
+            NH.NH_Status_TS as statusChangeDate,
+            NH.NH_Reg_TS as registrationDate,
+            NH.NH_Change_TS as changeDate,
+            NH.NH_BillC_Ind as billCInd,
+            NH.NH_Remark as nicHandleRemark,
+            NH.NH_Creator as creator,
+            NH.Chng_NH as changedByNicHandle,
+            NH.Chng_TS as histChangeDate,
+            T.Phone as Telecom_number,
+            T.Type as Telecom_type,
+            T.Order as Telecom_order,
+            NH.Vat_Reg_Id as vatNo,
+            NH.Vat_Category as vatCategory,
+            AH.Agreement_Signed as agreementSigned,
+            AH.Ticket_Edit as ticketEdit
+        FROM
+            NicHandleHist as NH
+            LEFT OUTER JOIN TelecomHist T ON NH.Chng_ID = T.Chng_ID
+            LEFT OUTER JOIN AccountHist AH ON AH.Chng_ID = NH.Account_Chng_ID
+            LEFT OUTER JOIN Countries Cntr ON NH.Country_Id = Cntr.Id
+            LEFT OUTER JOIN Counties Cnt ON NH.County_Id = Cnt.Id
+    ]]>
+    </sql>
+
+    <sql id="selectCount">
+        select count(distinct(NH.Chng_ID))
+        FROM NicHandleHist as
+        NH
+    </sql>
+
+    <sql id="conditions">
+        <dynamic prepend="where">
+            <isNotNull prepend="and" property="criteria.nicHandleId">
+                NH.Nic_Handle =
+                #criteria.nicHandleId,handler=pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler#
+            </isNotNull>
+        </dynamic>
+    </sql>
+
+    <select id="findHistoricalNicHandle" resultMap="internalHistoricalNicHandle">
+        <include refid="historicalNicHandle.selectJoin" />
+        <include refid="historicalNicHandle.conditions" />
+        ORDER BY
+        NH.Chng_ID desc
+        <include refid="common.limitFrag" />
+    </select>
+
+    <select id="findCount" parameterClass="java.util.Map"
+        resultClass="int">
+        <include refid="historicalNicHandle.selectCount" />
+        <include refid="historicalNicHandle.conditions" />
+    </select>
+
+    <insert id="createHistoricalNicHandle"
+            parameterClass="pl.nask.crs.nichandle.dao.ibatis.objects.InternalHistoricalNicHandle">
+        INSERT INTO NicHandleHist (
+        Nic_Handle,
+        NH_Name,
+        Account_Chng_ID,
+        Co_Name,
+        NH_Address,
+        Country_Id,
+        County_Id,
+        NH_Email,
+        NH_Status,
+        NH_Status_TS,
+        NH_Reg_TS,
+        NH_Change_TS,
+        NH_BillC_Ind,
+        NH_Remark,
+        NH_Creator,
+        Chng_TS,
+        Chng_NH,
+        Vat_Category,
+        Vat_Reg_Id,
+        NH_Exported
+        ) SELECT
+        #nicHandleId,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #name,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        A.Chng_ID,
+        #companyName,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #address,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #country.id#,
+        #county.id#,
+        #email,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #status,handler=pl.nask.crs.nichandle.dao.ibatis.handlers.NicHandleStatusHandler#,
+        #statusChangeDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #registrationDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #changeDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #billCInd,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#,
+        #nicHandleRemark,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #creator,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #histChangeDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #changedByNicHandle,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #vatCategory,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #vatNo,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #exported,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#
+        FROM
+        Account A
+        WHERE
+        A.A_Number = #accountNumber#
+        <selectKey keyProperty="changeId" resultClass="long">
+            SELECT
+            LAST_INSERT_ID() AS changeId
+        </selectKey>
+    </insert>
+
+    <insert id="insertHistoricalTelecoms"
+        parameterClass="pl.nask.crs.nichandle.dao.ibatis.objects.InternalHistoricalNicHandle">
+        INSERT INTO TelecomHist(
+        Chng_ID,
+        Nic_Handle,
+        Phone,
+        Type,
+        `Order`
+        ) VALUES
+        <iterate property="telecoms" conjunction=",">
+            (
+            #changeId#,
+            #nicHandleId,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+            #telecoms[].number,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+            #telecoms[].type,handler=pl.nask.crs.nichandle.dao.ibatis.handlers.TelecomTypeHandler#,
+            #telecoms[].order#
+            )
+        </iterate>
+    </insert>
+
+</sqlMap>
+

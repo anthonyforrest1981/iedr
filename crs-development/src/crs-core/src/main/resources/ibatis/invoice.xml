@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "sql-map-2.dtd">
+
+<sqlMap namespace="invoice">
+
+    <resultMap id="plainInvoice" class="pl.nask.crs.payment.PlainInvoice">
+        <result property="id" column="id" />
+        <result property="invoiceNumber" column="invoiceNumber"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="accountName" column="accountName"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="accountNumber" column="accountNumber" />
+        <result property="address1" column="address1"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="address2" column="address2"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="address3" column="address3"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="billingNicHandle" column="billingNicHandle"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="billingNicHandleName" column="billingNicHandleName"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="completed" column="completed"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler" />
+        <result property="country" resultMap="country.countryResult" />
+        <result property="county" resultMap="country.countyResult" />
+        <result property="crsVersion" column="crsVersion"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="invoiceDate" column="invoiceDate" />
+        <result property="MD5" column="MD5"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="totalCost" column="totalCost"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.MonetaryBigDecimalHandler" />
+        <result property="totalNetAmount" column="totalNetAmount"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.MonetaryBigDecimalHandler" />
+        <result property="totalVatAmount" column="totalVatAmount"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.MonetaryBigDecimalHandler" />
+        <result property="settlementDate" column="settlementDate" />
+        <result property="paymentMethod" column="paymentMethod"
+                typeHandler="pl.nask.crs.payment.dao.ibatis.handlers.PaymentMethodHandler" />
+    </resultMap>
+
+    <resultMap id="internalInvoice" extends="plainInvoice" class="pl.nask.crs.payment.dao.ibatis.objects.InternalInvoice">
+        <result property="transactions" column="id" select="invoice.getTransactionsForInvoice" />
+    </resultMap>
+
+    <resultMap id="domainInfo" class="pl.nask.crs.payment.DomainInfo">
+        <result property="domainName" column="domainName"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="orderId" column="orderId"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="regDate" column="regDate" />
+        <result property="renDate" column="renDate" />
+        <result property="transferDate" column="transferDate" />
+        <result property="operationType" column="operationType"
+            typeHandler="pl.nask.crs.payment.dao.ibatis.handlers.OperationTypeHandler" />
+        <result property="durationMonths" column="durationMonths" />
+        <result property="netAmount" column="netAmount" />
+        <result property="vatAmount" column="vatAmount" />
+    </resultMap>
+
+    <insert id="insertInvoice"
+        parameterClass="pl.nask.crs.payment.dao.ibatis.objects.InternalInvoice">
+        INSERT INTO Invoice (
+        Invoice_Number,
+        Account_Name,
+        Account_Number,
+        Address1,
+        Address2,
+        Address3,
+        Billing_Nic_Handle,
+        Completed,
+        Country_Id,
+        County_Id,
+        Crs_Version,
+        Invoice_TS,
+        MD5,
+        Total_Cost,
+        Total_Net_Amount,
+        Total_Vat_Amount
+        ) VALUES (
+        #invoiceNumber,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #accountName,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #accountNumber#,
+        #address1,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #address2,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #address3,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #billingNicHandle,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #completed,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#,
+        #country.id#,
+        #county.id#,
+        #crsVersion,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #invoiceDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #MD5,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #totalCost#,
+        #totalNetAmount#,
+        #totalVatAmount#
+        );
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT LAST_INSERT_ID();
+        </selectKey>
+    </insert>
+
+    <sql id="selectInvoice">
+        SELECT
+        I.ID as id,
+        I.Invoice_Number as invoiceNumber,
+        I.Account_Name as accountName,
+        I.Account_Number as accountNumber,
+        I.Address1 as address1,
+        I.Address2 as address2,
+        I.Address3 as address3,
+        I.Billing_Nic_Handle as billingNicHandle,
+        NH.NH_Name as billingNicHandleName,
+        I.Completed as completed,
+        I.Country_Id as countryId,
+        Cntr.Name as countryName,
+        Cntr.vat_category as countryVatCategory,
+        I.County_Id as countyId,
+        Cnt.Name as countyName,
+        I.Crs_Version as crsVersion,
+        I.Invoice_TS as invoiceDate,
+        I.MD5 as MD5,
+        I.Total_Cost as totalCost,
+        I.Total_Net_Amount as totalNetAmount,
+        I.Total_Vat_Amount as totalVatAmount,
+        RH.Settled_TS as settlementDate,
+        RH.Payment_Method as paymentMethod
+        FROM Invoice I
+        LEFT JOIN Countries Cntr ON (Cntr.Id = I.Country_Id)
+        LEFT JOIN Counties Cnt ON (Cnt.Id = I.County_Id)
+        LEFT JOIN NicHandle NH ON (NH.Nic_Handle = I.Billing_Nic_Handle AND I.Account_Number = NH.A_Number)
+        LEFT JOIN TransactionHist TH ON (I.ID = TH.Invoice_ID)
+        LEFT JOIN ReservationHist RH ON (TH.ID = RH.Transaction_ID)
+    </sql>
+
+    <select id="selectInvoiceById" resultMap="internalInvoice">
+        <include refid="invoice.selectInvoice" />
+        WHERE
+        I.ID = #id#
+        GROUP BY I.ID
+    </select>
+
+    <select id="selectInvoiceByNumber" resultMap="internalInvoice">
+        <include refid="invoice.selectInvoice" />
+        WHERE
+        I.Invoice_Number =
+        #invoiceNumber,handler=pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler#
+        GROUP BY I.ID
+    </select>
+
+    <select id="selectInvoiceLockedById" resultClass="java.lang.Integer">
+        SELECT
+        ID
+        FROM
+        Invoice
+        WHERE
+        ID = #id#
+        FOR UPDATE
+    </select>
+
+    <select id="selectAll" resultMap="internalInvoice">
+        <include refid="invoice.selectInvoice" />
+        GROUP BY I.ID
+    </select>
+
+    <select id="getTransactionsForInvoice" resultMap="transaction-hist.internalTransaction">
+        <include refid="transaction-hist.selectHistTransaction" />
+        WHERE
+        Invoice_ID = #id#
+        GROUP BY TH.ID
+    </select>
+
+    <sql id="invoicesCriteria">
+        <dynamic prepend="WHERE">
+            <isNotNull prepend="and" property="criteria.billingNH">
+                I.Billing_Nic_Handle =
+                #criteria.billingNH,handler=pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.accountName">
+                I.Account_Name =
+                #criteria.accountName,handler=pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.paymentMethod">
+                RH.Payment_Method =
+                #criteria.paymentMethod,handler=pl.nask.crs.payment.dao.ibatis.handlers.PaymentMethodHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.settledFrom">
+                RH.Settled_TS
+                >=
+                #criteria.settledFrom,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.settledTo">
+                RH.Settled_TS <![CDATA[<=]]>
+                #criteria.settledTo,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isEqual prepend="and" property="criteria.type" compareValue="Direct">
+                I.Account_Number = 1
+            </isEqual>
+            <isEqual prepend="and" property="criteria.type" compareValue="Registrar">
+                I.Account_Number != 1
+            </isEqual>
+            <isNotNull prepend="and" property="criteria.invoiceNumber">
+                I.Invoice_Number =
+                #criteria.invoiceNumber,handler=pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.invoiceNumberFrom">
+                I.Invoice_Number >=
+                #criteria.invoiceNumberFrom,handler=pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.invoiceNumberTo">
+                I.Invoice_Number <![CDATA[<=]]>
+                #criteria.invoiceNumberTo,handler=pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.invoiceDateFrom">
+                I.Invoice_TS
+                >=
+                #criteria.invoiceDateFrom,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.invoiceDateTo">
+                I.Invoice_TS <![CDATA[<=]]>
+                #criteria.invoiceDateTo,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.invoiceDateLike">
+                I.Invoice_TS
+                LIKE
+                #criteria.invoiceDateLike,handler=pl.nask.crs.commons.dao.ibatis.handlers.LooseSubstringHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.settlementDateLike">
+                RH.Settled_TS
+                LIKE
+                #criteria.settlementDateLike,handler=pl.nask.crs.commons.dao.ibatis.handlers.LooseSubstringHandler#
+            </isNotNull>
+        </dynamic>
+    </sql>
+
+    <select id="findPlainInvoices" parameterClass="java.util.Map" resultMap="plainInvoice">
+        <include refid="selectInvoice" />
+        <include refid="invoicesCriteria" />
+        GROUP BY I.ID
+        <include refid="common.sortFrag" />
+        <include refid="common.limitFrag" />
+    </select>
+
+    <select id="countFindInvoices" parameterClass="java.util.Map" resultClass="int">
+        SELECT COUNT(DISTINCT(I.ID))
+        FROM Invoice I
+        LEFT JOIN TransactionHist TH ON (I.ID = TH.Invoice_ID)
+        LEFT JOIN ReservationHist RH ON (TH.ID = RH.Transaction_ID)
+        <include refid="invoicesCriteria" />
+    </select>
+
+    <select id="getInvoiceInfo" parameterClass="string"
+        resultMap="domainInfo">
+        SELECT
+        DH.D_Name as domainName,
+        TH.Order_ID as orderId,
+        DH.D_Reg_TS as regDate,
+        RH.Period_End_Dt as renDate,
+        DH.D_Transfer_TS as transferDate,
+        RH.Operation_Type as operationType,
+        RH.Duration_Months as durationMonths,
+        RH.Amount as netAmount,
+        RH.Vat_Amount as vatAmount
+        FROM
+        Invoice I
+        INNER JOIN TransactionHist TH ON (I.ID = TH.Invoice_ID)
+        INNER JOIN ReservationHist RH ON (TH.ID = RH.Transaction_ID)
+        LEFT JOIN DomainHist DH ON (RH.Domain_Chng_ID = DH.Chng_ID)
+        WHERE
+        I.Invoice_Number = #invoiceNumber,handler=pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler#
+        ORDER BY domainName ASC
+    </select>
+
+    <update id="updateInvoice"
+        parameterClass="pl.nask.crs.payment.dao.ibatis.objects.InternalInvoice">
+        UPDATE
+        Invoice I
+        SET
+        I.MD5 = #MD5,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        I.Completed = #completed,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#
+        WHERE
+        I.ID = #id#
+    </update>
+
+</sqlMap>

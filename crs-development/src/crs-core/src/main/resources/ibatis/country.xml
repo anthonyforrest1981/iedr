@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "sql-map-2.dtd">
+
+<sqlMap namespace="country">
+
+    <cacheModel id="countriesCache" type="LRU">
+        <flushInterval hours="24" />
+        <property name="size" value="1000" />
+    </cacheModel>
+    <cacheModel id="countiesCache" type="LRU">
+        <flushInterval hours="24" />
+        <property name="size" value="5000" />
+    </cacheModel>
+    <cacheModel id="countryCache" type="LRU">
+        <flushInterval hours="24" />
+        <property name="size" value="500" />
+    </cacheModel>
+
+    <resultMap id="countryResult"
+        class="pl.nask.crs.country.Country">
+        <result property="id" column="countryId" />
+        <result property="name" column="countryName"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="vatCategory" column="countryVatCategory" />
+        <result property="counties" column="countryId"
+            select="country.getCountryCounties" />
+    </resultMap>
+
+    <resultMap id="countyResult"
+        class="pl.nask.crs.country.County">
+        <result property="id" column="countyId" />
+        <result property="name" column="countyName"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+    </resultMap>
+
+    <sql id="countryCriteria">
+        <dynamic>
+            <isNotNull property="criteria">
+                where
+                Name=#criteria.countryName,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#
+            </isNotNull>
+        </dynamic>
+    </sql>
+
+    <select id="findCountries" resultMap="countryResult"
+        cacheModel="countriesCache">
+        SELECT Id as countryId,
+        Name as countryName,
+        vat_category as countryVatCategory
+        from Countries
+        <include refid="countryCriteria" />
+    </select>
+
+    <select id="countFindCountries" resultClass="int" cacheModel="countriesCache">
+        SELECT count(*) from Countries
+        <include refid="countryCriteria" />
+    </select>
+
+    <select id="getCountry" resultMap="countryResult"
+        parameterClass="int" cacheModel="countryCache">
+        SELECT Id as countryId,
+        Name as countryName,
+        vat_category as countryVatCategory
+        from Countries
+        where Id=#id#
+    </select>
+
+    <select id="getCountryCounties" resultMap="countyResult" parameterClass="long" cacheModel="countiesCache">
+        select Id as countyId,
+        Name as countyName
+        from Counties where Country_Id = #id#
+    </select>
+
+    <sql id="countyCriteria">
+        <dynamic prepend="where">
+            <isNotNull prepend="and" property="criteria.countyId">
+                Id =
+                #criteria.countyId#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.countyName">
+                Name =
+                #criteria.countyName,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.countryId">
+                Country_Id =
+                #criteria.countryId#
+            </isNotNull>
+        </dynamic>
+    </sql>
+
+    <select id="findCounties" resultMap="countyResult"
+        cacheModel="countiesCache">
+        SELECT Id as countyId,
+        Name as countyName
+        from Counties
+        <include refid="countyCriteria" />
+    </select>
+
+    <select id="countFindCounties" resultClass="int" cacheModel="countriesCache">
+        SELECT count(*) from Counties
+        <include refid="countyCriteria" />
+    </select>
+
+    <select id="getCounty" resultMap="countyResult"
+        parameterClass="int" cacheModel="countiesCache">
+        SELECT Id as countyId,
+        Name as countyName
+        from Counties
+        where Id=#id#
+    </select>
+
+</sqlMap>
+

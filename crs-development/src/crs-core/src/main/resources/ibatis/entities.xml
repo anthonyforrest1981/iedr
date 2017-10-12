@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "sql-map-2.dtd">
+
+<sqlMap namespace="entities">
+
+    <cacheModel id="entityClassCache" type="LRU">
+        <flushInterval hours="24" />
+        <property name="size" value="20" />
+    </cacheModel>
+
+    <cacheModel id="entityCategoryCache" type="LRU">
+        <flushInterval hours="24" />
+        <property name="size" value="30" />
+    </cacheModel>
+
+    <cacheModel id="entitySubcategoryCache" type="LRU">
+        <flushInterval hours="24" />
+        <property name="size" value="30" />
+    </cacheModel>
+
+    <cacheModel id="ownerTypeCache" type="LRU">
+        <flushInterval hours="24" />
+        <property name="size" value="30" />
+    </cacheModel>
+
+    <resultMap id="entityClass" class="pl.nask.crs.entities.EntityClass">
+        <result property="id" column="classId" />
+        <result property="name" column="className"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="categories" column="classId" select="entities.getCategoryList" />
+    </resultMap>
+
+    <resultMap id="entityCategory" class="pl.nask.crs.entities.EntityCategory">
+        <result property="id" column="categoryId" />
+        <result property="name" column="categoryName"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="subcategories" column="categoryId" select="entities.getSubcategoryList" />
+    </resultMap>
+
+    <resultMap id="ownerType" class="pl.nask.crs.entities.OwnerType">
+        <result property="id" column="ownerTypeId" />
+        <result property="name" column="ownerTypeName"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="classId" column="classId" />
+        <result property="categoryId" column="categoryId" />
+        <result property="charity" column="charity" />
+    </resultMap>
+
+    <resultMap id="entitySubcategory" class="pl.nask.crs.entities.EntitySubcategory">
+        <result property="id" column="subcategoryId" />
+        <result property="name" column="subcategoryName"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+    </resultMap>
+
+    <select id="getClassList" cacheModel="entityClassCache" parameterClass="java.util.Map" resultMap="entityClass">
+        select
+        id as classId,
+        name as className
+        from Class
+    </select>
+
+    <select id="getClass" cacheModel="entityClassCache"
+        parameterClass="long" resultMap="entityClass">
+        select
+        id as classId,
+        name as className
+        from Class
+        where id=#id#
+    </select>
+
+    <select id="getCategoryList" cacheModel="entityCategoryCache" parameterClass="long" resultMap="entityCategory">
+        select
+        id as categoryId,
+        name as categoryName
+        from Category
+        join Class_to_Category ctc on (Category.id = ctc.category_id)
+        where ctc.class_id = #classId#
+    </select>
+
+    <select id="getAllCategories" cacheModel="entityCategoryCache" resultMap="entityCategory">
+        select
+        id as categoryId,
+        name as categoryName
+        from Category
+    </select>
+
+    <select id="getCategory" cacheModel="entityCategoryCache" parameterClass="long" resultMap="entityCategory">
+        select
+        id as categoryId,
+        name as categoryName
+        from Category
+        where Category.id = #id#
+    </select>
+
+    <select id="getSubcategoryList" cacheModel="entitySubcategoryCache" parameterClass="long"
+            resultMap="entitySubcategory">
+        select
+        id as subcategoryId,
+        name as subcategoryName
+        from Subcategory
+        join Category_to_Subcategory ctsc on (Subcategory.id = ctsc.subcategory_id)
+        where ctsc.category_id = #categoryId#
+    </select>
+
+    <select id="getSubcategory" cacheModel="entitySubcategoryCache" parameterClass="long" resultMap="entitySubcategory">
+        select
+        id as subcategoryId,
+        name as subcategoryName
+        from Subcategory
+        where Subcategory.id = #id#
+    </select>
+
+    <select id="getClassByName" parameterClass="string" resultMap="entityClass">
+        SELECT
+        id as classId,
+        name as className
+        FROM Class c
+        WHERE name =
+        #cName,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#
+    </select>
+
+    <select id="getCategoryByName" parameterClass="string" resultMap="entityCategory">
+        SELECT
+        id as categoryId,
+        name as categoryName
+        FROM Category c
+        WHERE name =
+        #ctName,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#
+    </select>
+
+    <select id="isClassMatchCategory" parameterClass="java.util.Map" resultClass="int">
+        SELECT COUNT(*)
+        FROM
+        Class_to_Category ctc
+        WHERE
+        ctc.class_id = #cId#
+        AND ctc.category_id = #ctId#
+    </select>
+
+    <select id="isCategoryMatchSubcategory" parameterClass="java.util.Map" resultClass="int">
+        SELECT COUNT(*)
+        FROM
+        Category_to_Subcategory cts
+        WHERE
+        cts.category_id = #ctId#
+        AND cts.subcategory_id = #sctId#
+    </select>
+
+    <sql id="selectOwnerType">
+        select
+        id as ownerTypeId,
+        name as ownerTypeName,
+        class_id as classId,
+        category_id as categoryId,
+        charity as charity
+        from Owner_Type
+    </sql>
+
+    <select id="getOwnerType" cacheModel="ownerTypeCache" parameterClass="long" resultMap="ownerType">
+        <include refid="selectOwnerType" />
+        where id = #id#
+    </select>
+
+    <select id="getOwnerTypeByName" parameterClass="string" resultMap="ownerType">
+        <include refid="selectOwnerType" />
+        where name = #name#
+    </select>
+
+    <select id="getAllOwnerTypes" cacheModel="ownerTypeCache" resultMap="ownerType">
+        <include refid="selectOwnerType" />
+    </select>
+
+</sqlMap>

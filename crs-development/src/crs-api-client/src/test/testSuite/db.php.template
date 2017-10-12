@@ -1,0 +1,9 @@
+<?php
+
+class Config {
+
+    const DB_HOSTNAME = "crsdb";
+    const DB_NAME = "crsdb";
+    const DB_USERNAME = "crsuser";
+    const DB_PASSWORD = "crspassword";
+}

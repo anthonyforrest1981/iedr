@@ -1,0 +1,129 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+    <import resource="classpath:application-services-config.xml"/>
+
+    <aop:aspectj-autoproxy/>
+    <bean id="utf8Aspect" class="pl.nask.crs.api.validation.Utf8ValidatorAspect"/>
+
+    <bean id="CRSAuthenticationService" class="pl.nask.crs.api.authentication.AuthenticationServiceEndpoint" autowire-candidate="false">
+        <property name="authenticationService" ref="wsAuthenticationService"/>
+        <property name="nicHandleAppService" ref="nicHandleAppService" />
+    </bean>
+
+    <bean id="CRSAuthenticationServiceProxy" class="pl.nask.crs.api.authentication.CRSAuthenticationServiceProxy">
+        <property name="service" ref="CRSAuthenticationService" />
+    </bean>
+
+    <bean id="wsSessAwareService" class="pl.nask.crs.api.WsSessionAware">
+        <property name="authenticationService" ref="wsAuthenticationService"/>
+    </bean>
+
+    <bean id="CRSDomainAppService" class="pl.nask.crs.api.domain.DomainAppServiceEndpoint" parent="wsSessAwareService" autowire-candidate="false">
+        <property name="service" ref="domainAppService"/>
+    </bean>
+
+    <bean id="CRSDomainAppServiceProxy" class="pl.nask.crs.api.domain.CRSDomainAppServiceProxy">
+        <property name="service" ref="CRSDomainAppService"/>
+    </bean>
+
+    <bean id="CRSDocumentAppService" class="pl.nask.crs.api.document.DocumentAppServiceEndpoint" parent="wsSessAwareService" autowire-candidate="false">
+        <property name="documentAppService" ref="documentAppService"/>
+    </bean>
+
+    <bean id="CRSDocumentAppServiceProxy" class="pl.nask.crs.api.document.CRSDocumentAppServiceProxy">
+        <property name="service" ref="CRSDocumentAppService"/>
+    </bean>
+
+    <bean id="CRSEmailDisablerAppService" class="pl.nask.crs.api.emaildisabler.EmailDisablerAppServiceEndpoint" parent="wsSessAwareService" autowire-candidate="false">
+        <property name="service" ref="emailDisablerAppService"/>
+    </bean>
+
+    <bean id="CRSEmailDisablerAppServiceProxy" class="pl.nask.crs.api.emaildisabler.CRSEmailDisablerAppServiceProxy">
+        <property name="service" ref="CRSEmailDisablerAppService"/>
+    </bean>
+
+    <bean id="CRSResellerService" class="pl.nask.crs.api.account.ResellerAppServiceEndpoint" parent="wsSessAwareService" autowire-candidate="false">
+        <property name="service" ref="accountAppService"/>
+        <property name="searchService" ref="accountSearchService"/>
+    </bean>
+
+    <bean id="CRSResellerServiceProxy" class="pl.nask.crs.api.account.CRSResellerAppServiceProxy">
+        <property name="service" ref="CRSResellerService" />
+    </bean>
+
+    <bean id="CRSNicHandleAppService" class="pl.nask.crs.api.nichandle.NicHandleAppServiceEndpoint" parent="wsSessAwareService" autowire-candidate="false">
+        <property name="service" ref="nicHandleAppService"/>
+        <property name="searchService" ref="nicHandleSearchService"/>
+        <property name="userAppService" ref="userAppService" />
+        <property name="countryFactory" ref="countryFactory"/>
+    </bean>
+
+    <bean id="CRSNicHandleAppServiceProxy" class="pl.nask.crs.api.nichandle.CRSNicHandleAppServiceProxy">
+        <property name="service" ref="CRSNicHandleAppService"/>
+    </bean>
+
+    <bean id="CRSTicketAppService" class="pl.nask.crs.api.ticket.TicketAppServiceEndpoint" parent="wsSessAwareService" autowire-candidate="false">
+        <property name="service" ref="ticketAppService"/>
+        <property name="userSearchService" ref="userSearchService" />
+    </bean>
+
+    <bean id="CRSTicketAppServiceProxy" class="pl.nask.crs.api.ticket.CRSTicketAppServiceProxy">
+        <property name="service" ref="CRSTicketAppService"/>
+    </bean>
+
+    <bean id="CRSPermissionsAppService" class="pl.nask.crs.api.users.UserAppServiceEndpoint" parent="wsSessAwareService" autowire-candidate="false">
+        <property name="service" ref="userAppService"/>
+    </bean>
+
+    <bean id="CRSPermissionsAppServiceProxy" class="pl.nask.crs.api.users.CRSPermissionsAppServiceProxy">
+        <property name="service" ref="CRSPermissionsAppService"/>
+    </bean>
+
+    <bean id="CRSPaymentAppService" class="pl.nask.crs.api.payment.PaymentAppServiceEndpoint" parent="wsSessAwareService" autowire-candidate="false">
+        <property name="service" ref="paymentAppService"/>
+    </bean>
+
+    <bean id="CRSPaymentAppServiceProxy" class="pl.nask.crs.api.payment.CRSPaymentAppServiceProxy">
+        <property name="service" ref="CRSPaymentAppService"/>
+    </bean>
+
+    <bean id="CRSCommonAppService" class="pl.nask.crs.api.common.CommonAppServiceEndpoint" parent="wsSessAwareService" autowire-candidate="false">
+        <property name="commonAppService" ref="commonAppService"/>
+    </bean>
+
+    <bean id="CRSCommonAppServiceProxy" class="pl.nask.crs.api.common.CRSCommonAppServiceProxy">
+        <property name="service" ref="CRSCommonAppService"/>
+    </bean>
+
+    <bean id="CRSZoneAppService" class="pl.nask.crs.api.zone.ZoneAppServiceEndpoint" parent="wsSessAwareService" autowire-candidate="false">
+        <property name="commonAppService" ref="commonAppService"/>
+    </bean>
+
+    <bean id="CRSZoneAppServiceProxy" class="pl.nask.crs.api.zone.CRSZoneAppServiceProxy">
+        <property name="service" ref="CRSZoneAppService"/>
+    </bean>
+
+    <bean id="CRSInfo" class="pl.nask.crs.api.common.InfoEndpoint" autowire-candidate="false">
+        <property name="applicationConfig" ref="applicationConfig"/>
+    </bean>
+
+    <bean id="CRSInfoProxy" class="pl.nask.crs.api.common.CRSInfoProxy">
+        <property name="service" ref="CRSInfo"/>
+    </bean>
+
+    <bean id="CRSSecondaryMarketAppService" class="pl.nask.crs.api.secondarymarket.SecondaryMarketAppServiceEndpoint" parent="wsSessAwareService" autowire-candidate="false">
+        <property name="service" ref="secondaryMarketAppService"/>
+    </bean>
+
+    <bean id="CRSSecondaryMarketAppServiceProxy" class="pl.nask.crs.api.secondarymarket.CRSSecondaryMarketAppServiceProxy">
+        <property name="service" ref="CRSSecondaryMarketAppService"/>
+    </bean>
+
+</beans>

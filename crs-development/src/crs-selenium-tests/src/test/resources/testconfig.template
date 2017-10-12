@@ -1,0 +1,125 @@
+# Address where the NRC application is hosted.
+consolehost =
+# Credentials to this host.
+consolesshuser =
+consolesshpassword =
+# if set to "true" tests expect to be promted for password while doing sudo over ssh
+consolesshpasswordprompt =
+
+# URL to NRC application. Trailing "/" is required. If the property is set to
+# http://example.com/ it would mean that the URL to the main page is
+# http://example.com/index.php
+consoleurl =
+
+# Address where the CRS-WEB application is hosted.
+crswebhost =
+# Credentials to this host.
+crswebsshuser =
+crswebsshpassword =
+# if set to "true" tests expect to be promted for password while doing sudo over ssh
+crswebsshpasswordprompt =
+
+# URL to CRS-WEB application. Trailing "/" is required.
+# e.g. http://crsweb:8080/crs-main-web/
+crsweburl =
+# Credentials for the user to log into CRS-WEB system.
+crsweblogin =
+crswebpassword =
+
+# Properties needed to obtain JDBC connection. It should be in the form:
+# jdbc:mysql://[HOST]:[PORT]/[DATABASE_NAME]
+# e.g. jdbc:mysql://crsdb:3306/crsdb
+dburl =
+dbuser =
+dbpassword =
+
+# Address where the CRS-WS application is hosted.
+crswshost =
+# Credentials to this host.
+crswssshuser =
+crswssshpassword =
+# if set to "true" tests expect to be promted for password while doing sudo over ssh
+crswssshpasswordprompt =
+
+# URL to CRS-WS application. Trailing "/" is required.
+# e.g. http://crsws:8080/crs-web-services/
+crswsurl =
+
+# Address where the CRS-SCHEDULER application is hosted
+crsschedulerhost =
+# Credentials to this host
+crsschedulersshuser =
+crsschedulersshpassword =
+# if set to "true" tests expect to be promted for password while doing sudo over ssh
+crsschedulersshpasswordprompt =
+
+# URL to CRS-SCHEDULER application (without path, only host and servlet context)
+# e.g. http://crsscheduler:8080/crs-scheduler/
+schedulermonitorurl =
+# scheduler monitor user (must have tech or techlead privilege level)
+schedulerusernh =
+scheduleruserpass =
+
+# Location of ckdns script (absolute path)
+# e.g. /opt/crs/tools/ckdns
+ckdnslocation =
+
+# Location of catalina.out (absolute path)
+# e.g. /opt/crs/tomcat/logs/catalina.out
+applicationloglocation =
+
+# Location of application log file on Console machine
+# e.g. /var/iedr/console/application.log
+consoleapplicationloglocation =
+
+# Location of soap log file on Console machine
+# The path will be extended with "_YYYY-MM-DD.log" (with YYYY-MM-DD being current date)
+# e.g. /var/iedr/console/wsapi_soap
+# (which means that the actual file location is e.g. /var/iedr/console/wsapi_soap_1999-01-31.log)
+soaploglprefix =
+
+# Value of documentsDirPath variable in web.xml on crsweb host.
+# e.g. /opt/crs/tomcat/webapps
+documents_dir_path =
+
+# Value of emailSenderAdditionalBCC variable in web.xml on crsws host.
+# e.g. address@iedr.ie
+additionalbccaddress =
+
+# Email address which should be used to test uploading documents via mail.
+documentsemailaddress =
+# Address of SMTP server which is capable of delivering emails to foregoing
+# email address.
+documentssmtpserver =
+# port for SMTP server, e.g. 25
+documentssmtpport =
+
+# Browsers to be tested. Possible options are: Firefox, IE, Edge.
+# Multiple browsers:
+# browsers = Firefox, IE
+# One browser:
+# browsers = Firefox
+browsers =
+
+# Path to firefox profile directory. Uncomment it if you want WebDriver to use
+# your predefined firefox profile instead of a clean one. Provide a path for the
+# directory (should be something like
+# C:/Users/Administrator/AppData/Roaming/Mozilla/Firefox/Profiles/w9lum26s.default).
+# firefoxprofilepath =
+
+# Path to IEDriverServer.exe. If running on linux, leave empty.
+# e.g. C:/iedr/IEDriverServer.exe
+iedriverpath =
+
+# Path to MicrosoftWebDriver.exe. If running on linux, leave empty.
+# e.g. C:/iedr/MicrosoftWebDriver.exe
+edgedriverpath =
+
+# Directory where logs and screenshots will be stored.
+# e.g. C:/iedr/runs
+logdirectory =
+
+# This is to account for differences in IDEs used to run the tests. This setting
+# will only affect running separate tests. If you're using IntelliJ in version
+# >= 2016.1.3, set to true. Set to false otherwise.
+skipparameterizedfilter =

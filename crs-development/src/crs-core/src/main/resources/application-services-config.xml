@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd"
+    default-autowire="no">
+    <!-- keeps the configuration of the application services layer -->
+
+    <import resource="classpath:commons-base-config.xml" />
+    <import resource="classpath:permissions-config.xml" />
+    <import resource="classpath:users-config.xml" />
+    <import resource="classpath:domains-config.xml" />
+    <import resource="classpath:nic-handles-config.xml" />
+    <import resource="classpath:secondary-market-config.xml" />
+    <import resource="classpath:security-config.xml" />
+    <import resource="classpath:ticket-config.xml" />
+    <import resource="classpath:emails.xml" />
+    <import resource="classpath:incoming-docs-config.xml" />
+    <import resource="classpath:transactions.xml" />
+    <import resource="classpath:payment-full-config.xml" />
+    <import resource="classpath:commons.xml" />
+
+    <bean id="nicHandleAppService"
+        class="pl.nask.crs.app.nichandles.impl.NicHandleAppServiceImpl">
+        <constructor-arg ref="nicHandleService" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <constructor-arg ref="historicalNicHandleSearchService" />
+        <constructor-arg ref="userService" />
+        <constructor-arg ref="resellerDefaultsService" />
+        <constructor-arg ref="applicationConfig" />
+        <property name="servicesRegistry" ref="services" />
+    </bean>
+
+    <bean id="ticketAppService" class="pl.nask.crs.app.tickets.impl.TicketAppServiceImpl">
+        <constructor-arg ref="ticketSearchService" />
+        <constructor-arg ref="ticketService" />
+        <constructor-arg ref="ticketHistorySearchService" />
+        <constructor-arg ref="domainDAO" />
+        <constructor-arg ref="domainSearchService" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <constructor-arg ref="paymentSearchService" />
+        <constructor-arg ref="userSearchService" />
+        <constructor-arg ref="applicationConfig" />
+    </bean>
+
+    <bean id="userAppService" class="pl.nask.crs.app.users.impl.UserAppServiceImpl">
+        <constructor-arg ref="userSearchService" />
+        <constructor-arg ref="userService" />
+        <constructor-arg ref="historicalUserSearchService" />
+    </bean>
+
+    <bean id="domainAppService" class="pl.nask.crs.app.domains.impl.DomainAppServiceImpl">
+        <constructor-arg ref="domainSearchService" />
+        <constructor-arg ref="documentsService" />
+        <constructor-arg ref="ticketSearchService" />
+        <constructor-arg ref="domainService" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <constructor-arg ref="applicationConfig" />
+    </bean>
+
+    <bean id="documentAppService" class="pl.nask.crs.app.document.impl.DocumentAppServiceImpl">
+        <constructor-arg ref="applicationConfig" />
+        <constructor-arg ref="documentsService" />
+        <constructor-arg ref="accountSearchService" />
+        <constructor-arg ref="emailTemplateSender" />
+        <constructor-arg ref="ticketSearchService" />
+        <constructor-arg ref="ticketService" />
+        <constructor-arg ref="secondaryMarketService" />
+    </bean>
+
+    <bean id="emailDisablerAppService"
+        class="pl.nask.crs.app.emaildisabler.impl.EmailDisablerAppServiceImpl">
+        <constructor-arg ref="emailDisablerService" />
+    </bean>
+
+    <bean id="emailTemplateAppService"
+        class="pl.nask.crs.app.email.impl.EmailTemplateAppServiceImpl">
+        <constructor-arg ref="emailTemplateService" />
+    </bean>
+
+    <bean id="emailGroupAppService" class="pl.nask.crs.app.email.impl.EmailGroupAppServiceImpl">
+        <constructor-arg ref="emailGroupService" />
+    </bean>
+
+    <bean id="accountAppService" class="pl.nask.crs.app.accounts.impl.AccountAppServiceImpl">
+        <constructor-arg ref="accountSearchService" />
+        <constructor-arg ref="accountService" />
+        <constructor-arg ref="historicalAccountSearchService" />
+        <constructor-arg ref="nicHandleService" />
+        <constructor-arg ref="artificialUsersRegistry" />
+    </bean>
+
+    <bean id="paymentAppService" class="pl.nask.crs.app.payment.impl.PaymentAppServiceImpl">
+        <constructor-arg ref="services" />
+    </bean>
+
+    <bean id="reportsAppService" class="pl.nask.crs.app.reports.impl.ReportsAppServiceImpl">
+        <constructor-arg ref="ticketReportsSearchService" />
+        <constructor-arg ref="documentReportsSearchService" />
+        <constructor-arg ref="reportsService" />
+    </bean>
+
+    <bean id="commonAppService" class="pl.nask.crs.app.commons.impl.CommonAppServiceImpl">
+        <constructor-arg ref="appServices" />
+        <constructor-arg ref="dsmMachine" />
+        <constructor-arg ref="services" />
+        <constructor-arg ref="artificialUsersRegistry" />
+    </bean>
+
+    <bean id="appServices" class="pl.nask.crs.app.AppServicesRegistryImpl"
+        init-method="validate">
+        <property name="nicHandleAppService" ref="nicHandleAppService" />
+        <property name="ticketAppService" ref="ticketAppService" />
+        <property name="userAppService" ref="userAppService" />
+        <property name="reportsAppService" ref="reportsAppService" />
+        <property name="paymentAppService" ref="paymentAppService" />
+        <property name="domainAppService" ref="domainAppService" />
+        <property name="accountAppService" ref="accountAppService" />
+    </bean>
+
+    <bean id="services" class="pl.nask.crs.app.ServicesRegistryImpl">
+        <property name="domainSearchService" ref="domainSearchService" />
+        <property name="nicHandleSearchService" ref="nicHandleSearchService" />
+        <property name="nicHandleService" ref="nicHandleService" />
+        <property name="paymentService" ref="paymentService" />
+        <property name="paymentSearchService" ref="paymentSearchService" />
+        <property name="invoicingService" ref="invoicingService" />
+        <property name="accountSearchService" ref="accountSearchService" />
+        <property name="ticketSearchService" ref="ticketSearchService" />
+        <property name="ticketService" ref="ticketService" />
+        <property name="secondaryMarketService" ref="secondaryMarketService" />
+        <property name="dnsCheckService" ref="dnsCheckService" />
+        <property name="domainService" ref="domainService" />
+        <property name="emailTemplateSender" ref="emailTemplateSender" />
+        <property name="vatService" ref="vatService" />
+        <property name="priceService" ref="priceService" />
+        <property name="depositService" ref="depositService" />
+        <property name="contactSearchService" ref="contactSearchService" />
+        <property name="entityService" ref="entityService" />
+        <property name="topLevelDomainService" ref="topLevelDomainService" />
+        <property name="config" ref="applicationConfig" />
+    </bean>
+
+    <bean id="triplePassAppService" class="pl.nask.crs.app.triplepass.TriplePassAppServiceImpl">
+        <constructor-arg ref="paymentService" />
+        <constructor-arg ref="paymentSearchService" />
+        <constructor-arg ref="ticketService" />
+        <constructor-arg ref="dsmMachine" />
+        <constructor-arg ref="ticketSearchService" />
+        <constructor-arg ref="dnsCheckService" />
+        <constructor-arg ref="dnsNotificationService" />
+        <constructor-arg ref="emailTemplateSender" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <constructor-arg ref="domainSearchService" />
+        <constructor-arg ref="domainService" />
+        <constructor-arg ref="depositService" />
+    </bean>
+
+    <bean id="triplePassSupportService" class="pl.nask.crs.app.triplepass.TriplePassSupportServiceImpl">
+        <constructor-arg ref="triplePassAppService" />
+        <constructor-arg ref="ticketSearchService" />
+    </bean>
+
+    <bean id="pushQSupportService" class="pl.nask.crs.app.domains.impl.PushQSupportServiceImpl">
+        <constructor-arg ref="domainAppService" />
+        <constructor-arg ref="domainSearchService" />
+    </bean>
+
+    <bean id="invoicingSupportService"
+        class="pl.nask.crs.app.invoicing.impl.InvoicingSupportServiceImpl">
+        <constructor-arg ref="services" />
+        <constructor-arg ref="appServices" />
+        <constructor-arg ref="invoicingAppService" />
+    </bean>
+
+    <bean id="invoicingAppService"
+        class="pl.nask.crs.app.invoicing.impl.InvoicingAppServiceImpl">
+        <constructor-arg ref="invoicingService" />
+        <constructor-arg ref="paymentService" />
+        <constructor-arg ref="invoiceExporterChain" />
+    </bean>
+
+    <bean id="configAppService" class="pl.nask.crs.app.config.ConfigAppServiceImpl">
+        <constructor-arg ref="configDao" />
+    </bean>
+
+    <bean id="bulkTransferAppService"
+        class="pl.nask.crs.app.domains.impl.BulkTransferAppServiceImpl">
+        <constructor-arg ref="bulkTransferService" />
+    </bean>
+
+    <bean id="dnsNotificationAppService"
+          class="pl.nask.crs.app.dnscheck.impl.DnsNotificationAppServiceImpl">
+        <constructor-arg ref="dnsNotificationService" />
+    </bean>
+
+    <bean id="secondaryMarketAppService"
+        class="pl.nask.crs.app.secondarymarket.impl.SecondaryMarketAppServiceImpl">
+        <constructor-arg ref="secondaryMarketService" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <constructor-arg ref="userSearchService" />
+        <constructor-arg ref="applicationConfig" />
+    </bean>
+
+</beans>

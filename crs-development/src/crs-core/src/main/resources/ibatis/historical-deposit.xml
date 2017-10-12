@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "sql-map-2.dtd">
+
+<sqlMap namespace="historical-deposit">
+
+    <resultMap id="histInternalDeposit"
+        class="pl.nask.crs.payment.dao.ibatis.objects.InternalHistoricalDeposit">
+        <result property="nicHandleId" column="nicHandleId"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="nicHandleName" column="nicHandleName"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="transactionDate" column="transactionDate" />
+        <result property="openBal" column="openBal"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.MonetaryBigDecimalHandler" />
+        <result property="closeBal" column="closeBal"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.MonetaryBigDecimalHandler" />
+        <result property="transactionAmount" column="transactionAmount"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.MonetaryBigDecimalHandler" />
+        <result property="transactionType" column="transactionType"
+            typeHandler="pl.nask.crs.payment.dao.ibatis.handlers.DepositTransactionTypeHandler" />
+        <result property="orderId" column="orderId"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="correctorNH" column="correctorNH"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="remark" column="remark"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="changeId" column="id" />
+        <result property="histChangeDate" column="histChangeDate" />
+    </resultMap>
+
+    <insert id="createHistoricalDeposit"
+            parameterClass="pl.nask.crs.payment.dao.ibatis.objects.InternalHistoricalDeposit">
+        INSERT INTO DepositHist (
+        Nic_Handle_Chng_ID,
+        Trans_TS,
+        Open_Bal,
+        Close_Bal,
+        Order_ID,
+        Trans_Amount,
+        Trans_Type,
+        Corrector_NH,
+        Remark,
+        Chng_TS
+        ) SELECT
+        NH.Chng_ID,
+        #transactionDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #openBal#,
+        #closeBal#,
+        #orderId,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #transactionAmount#,
+        #transactionType,handler=pl.nask.crs.payment.dao.ibatis.handlers.DepositTransactionTypeHandler#,
+        #correctorNH,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #remark,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #histChangeDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+        FROM Deposit D
+        LEFT JOIN NicHandle NH ON NH.Nic_Handle = D.Nic_Handle
+        WHERE D.Nic_Handle =
+        #nicHandleId,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#
+        <selectKey keyProperty="changeId" resultClass="long">
+            SELECT
+            LAST_INSERT_ID() AS changeId
+        </selectKey>
+    </insert>
+
+    <sql id="selectDepositHist">
+        SELECT
+        DH.Chng_ID as id,
+        NHH.Nic_Handle as nicHandleId,
+        NHH.NH_Name as nicHandleName,
+        DH.Trans_TS as transactionDate,
+        DH.Open_Bal as openBal,
+        DH.Close_Bal as closeBal,
+        DH.Order_ID as orderId,
+        DH.Trans_Amount as transactionAmount,
+        DH.Trans_Type as transactionType,
+        DH.Corrector_NH as correctorNH,
+        DH.Remark as remark,
+        DH.Chng_TS as histChangeDate
+        FROM DepositHist DH
+        LEFT JOIN NicHandleHist NHH ON NHH.Chng_ID = DH.Nic_Handle_Chng_ID
+    </sql>
+
+    <sql id="depositHistCriteria">
+        <dynamic prepend="where">
+            <isNotNull prepend="and" property="criteria.nicHandleId">
+                NHH.Nic_Handle =
+                #criteria.nicHandleId,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.transactionDateFrom">
+                DH.Trans_TS >=
+                #criteria.transactionDateFrom,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.transactionDateTo">
+                DH.Trans_TS <![CDATA[<=]]>
+                #criteria.transactionDateTo,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.transactionType">
+                DH.Trans_Type =
+                #criteria.transactionType,handler=pl.nask.crs.payment.dao.ibatis.handlers.DepositTransactionTypeHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.correctorNH">
+                DH.Corrector_NH =
+                #criteria.correctorNH,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.accountBillNH">
+                NHH.Nic_Handle =
+                #criteria.accountBillNH,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#
+            </isNotNull>
+        </dynamic>
+    </sql>
+
+    <select id="findHistoricalDeposits" parameterClass="java.util.Map"
+        resultMap="histInternalDeposit">
+        <include refid="selectDepositHist" />
+        <include refid="depositHistCriteria" />
+        <include refid="common.sortFrag" />
+        <include refid="common.limitFrag" />
+    </select>
+
+    <select id="countFindHistoricalDeposits" parameterClass="java.util.Map"
+        resultClass="int">
+        SELECT
+        COUNT(*)
+        FROM DepositHist DH
+        LEFT JOIN NicHandleHist NHH ON NHH.Chng_ID = DH.Nic_Handle_Chng_ID
+        <include refid="depositHistCriteria" />
+    </select>
+
+</sqlMap>

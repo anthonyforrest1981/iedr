@@ -1,0 +1,319 @@
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "sql-map-2.dtd">
+
+<sqlMap namespace="historical-domain">
+
+    <resultMap id="domainHistoryResult"
+        class="pl.nask.crs.domains.dao.ibatis.objects.InternalHistoricalDomain">
+        <result property="changeId" column="changeId" />
+        <result property="name" column="name"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="holder" column="holder"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="holderClass" resultMap="entities.entityClass" />
+        <result property="holderCategory" resultMap="entities.entityCategory" />
+        <result property="holderSubcategory" resultMap="entities.entitySubcategory" />
+        <result property="resellerAccountId" column="resellerAccountId" />
+        <result property="resellerAccountName" column="resellerAccountName"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="registrationDate" column="registrationDate" />
+        <result property="renewalDate" column="renewalDate" />
+        <result property="changeDate" column="changeDate" />
+        <result property="remark" column="remark"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="authCode" column="authCode"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="authCodeExpirationDate" column="authCodeExpirationDate" />
+        <result property="authCodePortalCount" column="authCodePortalCount" />
+        <result property="clikPaid" column="clikPaid"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler" />
+        <result property="nameservers" column="changeId"
+            select="historical-domain.getNameserversForHistoricalDomain" />
+        <result property="contacts" column="changeId"
+            select="historical-domain.getContactsForHistoricalDomain" />
+        <result property="histChangeDate" column="histChangeDate" />
+        <result property="changedByNicHandle" column="changedByNicHandle"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="dsmState" resultMap="plain-domain.dsmState" />
+        <result property="suspensionDate" column="suspensionDate" />
+        <result property="deletionDate" column="deletionDate" />
+        <result property="transferDate" column="transferDate" />
+        <result property="lockingDate" column="lockingDate" />
+        <result property="lockingRenewalDate" column="lockingRenewalDate" />
+    </resultMap>
+
+    <resultMap id="histNameserverResult" class="pl.nask.crs.domains.nameservers.Nameserver">
+        <result property="name" column="name"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="ipv4Address" column="ipv4Address"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="ipv6Address" column="ipv6Address"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+    </resultMap>
+
+    <resultMap id="histContactResult"
+        class="pl.nask.crs.contacts.dao.ibatis.objects.InternalContact">
+        <result property="nicHandle" column="nicHandle"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="name" column="name"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="email" column="email"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="companyName" column="companyName"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="country" column="country"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="county" column="county"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="type" column="type"
+            typeHandler="pl.nask.crs.contacts.dao.ibatis.handlers.ContactTypeHandler" />
+    </resultMap>
+
+    <insert id="createHistoricalNameservers" parameterClass="java.util.Map">
+        INSERT INTO DNSHist (
+        Chng_ID,
+        D_Name,
+        DNS_Name,
+        DNS_Ipv4_Addr,
+        DNS_Ipv6_Addr,
+        DNS_Order
+        ) VALUES
+        <iterate property="nameservers" conjunction=",">
+            (
+            #domain.changeId#,
+            #domain.name,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+            #nameservers[].nameserver.name,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+            #nameservers[].nameserver.ipv4Address,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+            #nameservers[].nameserver.ipv6Address,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+            #nameservers[].order#
+            )
+        </iterate>
+    </insert>
+
+    <insert id="createHistoricalContact" parameterClass="java.util.Map">
+        INSERT INTO ContactHist (
+        Chng_ID,
+        D_Name,
+        Nic_Handle_Chng_ID,
+        Type
+        ) SELECT
+        #domain.changeId#,
+        #domain.name,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        Chng_ID,
+        #contact.type,handler=pl.nask.crs.contacts.dao.ibatis.handlers.ContactTypeHandler#
+        FROM
+        NicHandle
+        WHERE
+        Nic_Handle = #contact.nicHandle,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#
+    </insert>
+
+    <insert id="createHistoricalDomain"
+        parameterClass="pl.nask.crs.domains.dao.ibatis.objects.InternalHistoricalDomain">
+        INSERT INTO DomainHist (
+        D_Name,
+        D_Holder,
+        Class_Id,
+        Category_Id,
+        Subcategory_Id,
+        Account_Chng_ID,
+        D_Reg_TS,
+        D_Ren_Dt,
+        D_Change_TS,
+        D_Remark,
+        D_ClikPaid,
+        DSM_State,
+        D_Susp_Dt,
+        D_Del_Dt,
+        D_Transfer_TS,
+        D_Authcode,
+        D_Authc_Exp_Dt,
+        D_Authc_Portal_Cnt,
+        D_Locking_TS,
+        D_LockingRenewal_Dt,
+        Chng_NH,
+        Chng_TS
+        ) SELECT
+        #name,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #holder,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #holderClass.id#,
+        #holderCategory.id#,
+        #holderSubcategory.id#,
+        A.Chng_ID,
+        #registrationDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #renewalDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #changeDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #remark,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #clikPaid,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#,
+        #dsmState.id#,
+        #suspensionDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #deletionDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #transferDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #authCode,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #authCodeExpirationDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #authCodePortalCount#,
+        #lockingDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #lockingRenewalDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #changedByNicHandle,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #histChangeDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+        FROM
+        Account A
+        WHERE
+        A.A_Number = #resellerAccountId#
+        <selectKey keyProperty="changeId" resultClass="long">
+            SELECT
+            LAST_INSERT_ID() AS changeId
+        </selectKey>
+    </insert>
+
+    <sql id="historicalDomainSql">
+        select
+        D.Chng_ID as changeId,
+        D.D_Name as name,
+        D.D_Holder as holder,
+        D.Class_Id as classId,
+        CL.name as className,
+        D.Category_Id as categoryId,
+        CT.name as categoryName,
+        D.Subcategory_Id as subcategoryId,
+        SCT.name as subcategoryName,
+        AH.A_Number as resellerAccountId,
+        AH.A_Name as resellerAccountName,
+        D.D_Reg_TS as registrationDate,
+        D.D_Ren_Dt as renewalDate,
+        D.D_Susp_Dt as suspensionDate,
+        D.D_Del_Dt as deletionDate,
+        D.D_Transfer_TS as transferDate,
+        D.D_Change_TS as changeDate,
+        D.D_Remark as remark,
+        D.D_Authcode as authCode,
+        D.D_Authc_Exp_Dt as authCodeExpirationDate,
+        D.D_Authc_Portal_Cnt as authCodePortalCount,
+        D.D_ClikPaid as clikPaid,
+        D.Chng_NH as changedByNicHandle,
+        D.Chng_TS as histChangeDate,
+        D.DSM_State as dsmStateId,
+        DSM.D_Holder_Type as dsmHolderType,
+        DSM.Renewal_Mode as dsmRenewalMode,
+        DSM.Locked as dsmLocked,
+        DSM.Cust_Type as dsmCustomerType,
+        DSM.NRP_Status as dsmNrpStatus,
+        DSM.Secondary_Market_Status as dsmSecondaryMarketStatus,
+        DSM.Published as dsmPublished,
+        D.D_Locking_TS as lockingDate,
+        D.D_LockingRenewal_Dt as lockingRenewalDate
+        from
+        DomainHist as D
+        left join AccountHist as AH on (D.Account_Chng_ID = AH.Chng_ID)
+        left join Class as CL ON (CL.id = D.Class_Id)
+        left join Category as CT ON (CT.id = D.Category_Id)
+        left join Subcategory as SCT ON (SCT.id = D.Subcategory_Id)
+        join DSM_State as DSM on (D.DSM_State=DSM.State)
+    </sql>
+
+    <sql id="nicHandleJoin">
+        <dynamic>
+            <isNotNull property="criteria.nicHandle">
+                left join ContactHist as CH on (D.D_Name = CH.D_Name)
+                left join NicHandleHist as NHH on (NHH.Chng_ID = CH.Nic_Handle_Chng_ID)
+            </isNotNull>
+        </dynamic>
+    </sql>
+    <sql id="domainHistoryCriteria">
+        <dynamic prepend="where">
+            <isNotNull prepend="and" property="criteria.domainName">
+                D.D_Name like
+                #criteria.domainName,handler=pl.nask.crs.commons.dao.ibatis.handlers.LooseStringPrefixHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.domainHolder">
+                D.D_Holder like
+                #criteria.domainHolder,handler=pl.nask.crs.commons.dao.ibatis.handlers.LooseSubstringHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.accountId">
+                AH.A_Number = #criteria.accountId#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.nicHandle">
+                NHH.Nic_Handle
+                like
+                #criteria.nicHandle,handler=pl.nask.crs.commons.dao.ibatis.handlers.LooseStringPrefixHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.holderClassId">
+                D.Class_Id = #criteria.holderClassId#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.holderCategoryId">
+                D.Category_Id = #criteria.holderCategoryId#
+            </isNotNull>
+        </dynamic>
+    </sql>
+
+    <select id="getContactsForHistoricalDomain" resultMap="historical-domain.histContactResult">
+        SELECT
+        NHH.Nic_Handle as nicHandle,
+        NHH.NH_Name as name,
+        NHH.NH_Email as email,
+        NHH.Co_Name as companyName,
+        Cntr.Name as country,
+        Cnt.Name as county,
+        CH.Type as type
+        FROM
+        ContactHist as CH
+        LEFT JOIN NicHandleHist as NHH ON (CH.Nic_Handle_Chng_ID = NHH.Chng_ID)
+        LEFT JOIN Countries Cntr ON (Cntr.Id = NHH.Country_Id)
+        LEFT JOIN Counties Cnt ON (Cnt.Id = NHH.County_Id)
+        WHERE
+        CH.Chng_ID = #changeId#
+    </select>
+
+    <select id="getNameserversForHistoricalDomain" resultMap="historical-domain.histNameserverResult">
+        SELECT
+        DNS_Name as name,
+        DNS_IPv4_Addr as ipv4Address,
+        DNS_IPv6_Addr as ipv6Address
+        FROM
+        DNSHist
+        WHERE
+        Chng_ID = #changeId#
+        ORDER BY
+        DNS_Order
+    </select>
+
+    <select id="findDomainHistory" parameterClass="java.util.Map"
+        resultMap="historical-domain.domainHistoryResult">
+        <include refid="historical-domain.historicalDomainSql" />
+        <include refid="historical-domain.nicHandleJoin" />
+        <include refid="historical-domain.domainHistoryCriteria" />
+        <dynamic>
+            <isNotNull property="criteria.nicHandle">
+                group by CH.D_Name
+            </isNotNull>
+        </dynamic>
+        <include refid="common.sortFrag" />
+        <include refid="common.limitFrag" />
+    </select>
+
+    <select id="countDomainHistory" parameterClass="java.util.Map"
+        resultClass="int">
+        <dynamic>
+            <isNull property="criteria.nicHandle">
+                select
+                count(*)
+                from
+                DomainHist as D
+                left join AccountHist as AH on (D.Account_Chng_ID = AH.Chng_ID)
+                <include refid="historical-domain.domainHistoryCriteria" />
+            </isNull>
+            <isNotNull property="criteria.nicHandle">
+                select
+                count(*)
+                from
+                ContactHist as CH
+                left join NicHandleHist NHH on NHH.Chng_ID = CH.Nic_Handle_Chng_ID
+                where
+                NHH.Nic_Handle like
+                #criteria.nicHandle,handler=pl.nask.crs.commons.dao.ibatis.handlers.LooseStringPrefixHandler#
+            </isNotNull>
+        </dynamic>
+
+    </select>
+
+</sqlMap>

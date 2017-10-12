@@ -1,0 +1,80 @@
+package com.iedr.bpr.tests.gui;
+
+public class ConsoleUrlProvider {
+
+    public String allDomains;
+    public String authcodePortal;
+    public String changePassword;
+    public String createNicHandle;
+    public String currentNrp;
+    public String currentRenewals;
+    public String depositBalance;
+    public String depositStatement;
+    public String depositTopUps;
+    public String dns;
+    public String emailDisabler;
+    public String futureRenewals;
+    public String index;
+    public String invoiceHistory;
+    public String lockedDomains;
+    public String login;
+    public String logout;
+    public String newDirectAccount;
+    public String newDomains;
+    public String paymentHistory;
+    public String reauthorizeCcTransaction;
+    public String regNewDomain;
+    public String requestPasswordChange;
+    public String requestTransfer;
+    public String resetPassword;
+    public String tickets;
+    public String todaysCcReservations;
+    public String todaysDepositReservations;
+    public String topUp;
+    public String viewAutorenewDomains;
+    public String viewCharityDomains;
+    public String viewDomain;
+    public String viewNicHandle;
+    public String viewNonBillableDomains;
+    public String viewTransfersAway;
+    public String viewTransfersIn;
+
+    public ConsoleUrlProvider(final String base) {
+        allDomains = base + "index.php?r=domainreports/alldomains";
+        authcodePortal = base + "index.php?r=authcodePortal/request";
+        changePassword = base + "index.php?r=site/changePassword";
+        createNicHandle = base + "index.php?r=nichandles/createnichandle";
+        currentNrp = base + "index.php?r=account_current_nrp_statuses/menu";
+        currentRenewals = base + "index.php?r=account_current_renewals/menu";
+        depositBalance = base + "index.php?r=account_deposit_balance/deposit_balance";
+        depositStatement = base + "index.php?r=account_deposit_statement_of_account/menu";
+        depositTopUps = base + "index.php?r=account_view_deposit_topups/menu";
+        dns = base + "index.php?r=nsreports/dnsserversearch";
+        emailDisabler = base + "index.php?r=emailDisabler/menu";
+        futureRenewals = base + "index.php?r=account_future_renewals_by_month/menu";
+        index = base + "index.php";
+        invoiceHistory = base + "index.php?r=account_view_invoice_history/menu";
+        newDirectAccount = base + "index.php?r=site/newDirectAccount";
+        lockedDomains = base + "index.php?r=lockeddomains/view";
+        login = base + "index.php?r=site/login";
+        logout = base + "index.php?r=site/logout";
+        newDomains = base + "index.php?r=newdomains/view";
+        paymentHistory = base + "index.php?r=account_view_payment_history/menu";
+        reauthorizeCcTransaction = base + "index.php?r=account_reauthorise_cc_transaction/menu";
+        regNewDomain = base + "index.php?r=domains/regnew";
+        requestPasswordChange = base + "index.php?r=passwordReset/request";
+        requestTransfer = base + "index.php?r=domains/requesttransfer";
+        resetPassword = base + "index.php?r=passwordReset/changePassword";
+        tickets = base + "index.php?r=tickets/main";
+        todaysCcReservations = base + "index.php?r=account_today_cc_reservations/menu";
+        todaysDepositReservations = base + "index.php?r=account_today_deposit_reservations/menu";
+        topUp = base + "index.php?r=account_topup_my_deposit_account/menu";
+        viewAutorenewDomains = base + "index.php?r=account_view_autorenew_domains/menu";
+        viewCharityDomains = base + "index.php?r=account_view_charity_domains/menu";
+        viewDomain = base + "index.php?r=domains/viewdomain";
+        viewNicHandle = base + "index.php?r=nichandles/viewnichandle";
+        viewNonBillableDomains = base + "index.php?r=account_view_non_billable_domains/menu";
+        viewTransfersAway = base + "index.php?r=account_view_transfers_away/menu";
+        viewTransfersIn = base + "index.php?r=account_view_transfers_in/menu";
+    }
+}

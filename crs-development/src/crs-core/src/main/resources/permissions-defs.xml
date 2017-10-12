@@ -1,0 +1,947 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+    <!--Permissions -->
+
+    <bean id="fullAccess" class="pl.nask.crs.user.permissions.FullAccessPermission">
+        <constructor-arg value="fullAccess" />
+        <constructor-arg value="fullAccess" />
+    </bean>
+
+    <bean id="logingPermission" class="pl.nask.crs.user.permissions.LoginPermission">
+        <constructor-arg value="ws" />
+    </bean>
+    <bean id="crsLogingPermission" class="pl.nask.crs.user.permissions.LoginPermission">
+        <constructor-arg value="crs" />
+    </bean>
+    <bean id="apiLogingPermission" class="pl.nask.crs.user.permissions.LoginPermission">
+        <constructor-arg value="api" />
+    </bean>
+    <bean id="schedulerLoggingPermission" class="pl.nask.crs.user.permissions.LoginPermission">
+        <constructor-arg value="scheduler" />
+    </bean>
+
+    <bean id="crsMenuPermission" class="pl.nask.crs.user.permissions.NamedPermission">
+        <constructor-arg value="crsMenuPermission" />
+        <constructor-arg value="crs-menu" />
+    </bean>
+
+    <!-- account permissions -->
+    <bean id="accountGetPermission" class="pl.nask.crs.user.permissions.NamedPermission">
+        <constructor-arg value="accountGetPermission" />
+        <constructor-arg value="pl.nask.crs.app.accounts.AccountAppService.get" />
+    </bean>
+
+    <bean id="resellerAccountPermission" class="pl.nask.crs.app.authorization.permissions.ResellerPermission">
+        <constructor-arg value="resellerAccountPermission" />
+        <constructor-arg ref="accountGetPermission" />
+        <constructor-arg ref="nicHandleSearchService" />
+    </bean>
+
+    <bean id="accountViewPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="accountViewPermission" />
+        <constructor-arg value="pl.nask.crs.app.accounts.AccountAppService" />
+        <constructor-arg>
+            <list>
+                <value>get</value>
+                <value>history</value>
+                <value>search</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="accountCreatePermission" class="pl.nask.crs.user.permissions.NamedPermission">
+        <constructor-arg value="accountCreatePermission" />
+        <constructor-arg value="pl.nask.crs.app.accounts.AccountAppService.create" />
+    </bean>
+
+    <bean id="accountSavePermission" class="pl.nask.crs.user.permissions.NamedPermission">
+        <constructor-arg value="accountSavePermission" />
+        <constructor-arg value="pl.nask.crs.app.accounts.AccountAppService.save" />
+    </bean>
+
+    <bean id="accountSaveNoFlagsPermission"
+        class="pl.nask.crs.app.authorization.permissions.AccountPartEditPermission">
+        <constructor-arg value="accountSaveNoFlagsPermission" />
+        <constructor-arg
+            value="pl.nask.crs.app.accounts.AccountAppService.save" />
+        <constructor-arg ref="accountDAO" />
+    </bean>
+
+    <bean id="accountAlterStatusPermission" class="pl.nask.crs.user.permissions.NamedPermission">
+        <constructor-arg value="accountAlterStatusPermission" />
+        <constructor-arg value="pl.nask.crs.app.accounts.AccountAppService.alterStatus" />
+    </bean>
+
+    <!-- nic handle permissions -->
+    <bean id="saveNewPassOperations" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="saveNewPassOperations" />
+        <constructor-arg value="pl.nask.crs.app.nichandles.NicHandleAppService" />
+        <constructor-arg>
+            <list>
+                <value>saveNewPassword</value>
+                <value>resetPassword</value>
+                <value>changePassword</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="saveNewPassOwnNhPermission"
+        class="pl.nask.crs.app.authorization.permissions.OwnNhPermission">
+        <constructor-arg value="saveNewPassOwnNhPermission" />
+        <constructor-arg ref="saveNewPassOperations" />
+        <constructor-arg ref="nicHandleSearchService" />
+    </bean>
+
+    <bean id="defaultNicHandleOperations" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="defaultNicHandleOperations" />
+        <constructor-arg value="pl.nask.crs.app.nichandles.NicHandleAppService" />
+        <constructor-arg>
+            <list>
+                <value>canBeABillingContact</value>
+                <value>get</value>
+                <value>history</value>
+                <value>modifyNicHandleOwnAccount</value>
+                <value>search</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="defaultNicHandlePermission"
+        class="pl.nask.crs.app.authorization.permissions.DefaultAccessPermission">
+        <constructor-arg value="defaultNicHandlePermission" />
+        <constructor-arg ref="defaultNicHandleOperations" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <property name="domainDAO" ref="domainDAO" />
+    </bean>
+
+    <bean id="customerNicHandleOperations" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="customerNicHandleOperations" />
+        <constructor-arg value="pl.nask.crs.app.nichandles.NicHandleAppService" />
+        <constructor-arg>
+            <list>
+                <value>createNicHandleOwnAccount</value>
+                <value>get</value>
+                <value>getDefaults</value>
+                <value>history</value>
+                <value>modifyNicHandleOwnAccount</value>
+                <value>saveDefaults</value>
+                <value>search</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="resellerNicHandlePermission"
+        class="pl.nask.crs.app.authorization.permissions.ResellerPermission">
+        <constructor-arg value="resellerNicHandlePermission" />
+        <constructor-arg ref="customerNicHandleOperations" />
+        <constructor-arg ref="nicHandleSearchService" />
+    </bean>
+
+    <bean id="directRegistrarNicHandlePermission"
+        class="pl.nask.crs.app.authorization.permissions.DirectRegistrarPermission">
+        <constructor-arg value="directRegistrarNicHandlePermission" />
+        <constructor-arg ref="customerNicHandleOperations" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <property name="domainDAO" ref="domainDAO" />
+    </bean>
+
+    <bean id="nicHandleViewPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="nicHandleViewPermission" />
+        <constructor-arg value="pl.nask.crs.app.nichandles.NicHandleAppService" />
+        <constructor-arg>
+            <list>
+                <value>get</value>
+                <value>history</value>
+                <value>search</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="nicHandleEditPermission" class="pl.nask.crs.user.permissions.NamedPermission">
+        <constructor-arg value="nicHandleEditPermission" />
+        <constructor-arg
+            value="pl.nask.crs.app.nichandles.NicHandleAppService.modifyNicHandle" />
+    </bean>
+
+    <bean id="nicHandleStaffPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="nicHandleStaffPermission" />
+        <constructor-arg value="pl.nask.crs.app.nichandles.NicHandleAppService" />
+        <constructor-arg>
+            <list>
+                <value>alterStatus</value>
+                <value>changePassword</value>
+                <value>changeTfa</value>
+                <value>createNicHandle</value>
+                <value>getDefaults</value>
+                <value>modifyNicHandle</value>
+                <value>resetPassword</value>
+                <value>saveDefaults</value>
+                <value>saveNewPassword</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <!-- ticket permissions -->
+    <bean id="customerTicketOperations" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="customerTicketOperations" />
+        <constructor-arg value="pl.nask.crs.app.tickets.TicketAppService" />
+        <constructor-arg>
+            <list>
+                <value>edit</value>
+                <value>findOwn</value>
+                <value>getTicketForDomain</value>
+                <value>save</value>
+                <value>updateAsOwner</value>
+                <value>view</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="resellerTicketPermission"
+        class="pl.nask.crs.app.authorization.permissions.ResellerPermission">
+        <constructor-arg value="resellerTicketPermission" />
+        <constructor-arg ref="customerTicketOperations" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <property name="ticketSearchService" ref="ticketSearchService" />
+    </bean>
+
+    <bean id="directRegistrarTicketPermission"
+        class="pl.nask.crs.app.authorization.permissions.DirectRegistrarPermission">
+        <constructor-arg value="directRegistrarTicketPermission" />
+        <constructor-arg ref="customerTicketOperations" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <property name="ticketSearchService" ref="ticketSearchService" />
+    </bean>
+
+    <bean id="defaultTicketPermissions"
+        class="pl.nask.crs.app.authorization.permissions.DefaultAccessPermission">
+        <constructor-arg value="defaultTicketPermissions" />
+        <constructor-arg ref="customerTicketOperations" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <property name="ticketSearchService" ref="ticketSearchService" />
+    </bean>
+
+    <bean id="ticketViewPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="ticketViewPermission" />
+        <constructor-arg value="pl.nask.crs.app.tickets.TicketAppService" />
+        <constructor-arg>
+            <list>
+                <value>getTicketForDomain</value>
+                <value>history</value>
+                <value>search</value>
+                <value>view</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ticketStaffPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="ticketsStaffPermission" />
+        <constructor-arg value="pl.nask.crs.app.tickets.TicketAppService" />
+        <constructor-arg>
+            <list>
+                <value>accept</value>
+                <value>alterStatus</value>
+                <value>checkIn</value>
+                <value>checkOut</value>
+                <value>edit</value>
+                <value>reassign</value>
+                <value>reject</value>
+                <value>revise</value>
+                <value>save</value>
+                <value>updateAsAdmin</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <!-- triple pass permissions -->
+    <bean id="triplePassPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="triplePassPermission" />
+        <constructor-arg value="pl.nask.crs.app.triplepass.TriplePassAppService" />
+        <constructor-arg>
+            <list>
+                <value>performFinancialCheck</value>
+                <value>performTechnicalCheck</value>
+                <value>performTicketCancellation</value>
+                <value>promoteModificationTicket</value>
+                <value>promoteTicketToDomain</value>
+                <value>promoteTransferTicket</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <!-- domain permissions -->
+    <bean id="defaultDomainOperations" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="defaultDomainOperations" />
+        <constructor-arg value="pl.nask.crs.app.domains.DomainAppService" />
+        <constructor-arg>
+            <list>
+                <value>findDomainCountForContact</value>
+                <value>findDomainsForCurrentRenewal</value>
+                <value>findDomainsForFutureRenewal</value>
+                <value>findOwn</value>
+                <value>findOwnDeletedDomains</value>
+                <value>findOwnExtended</value>
+                <value>findOwnPlain</value>
+                <value>getAll</value>
+                <value>getNsReports</value>
+                <value>isCharity</value>
+                <value>isEventValid</value>
+                <value>search</value>
+                <value>validateDomainToModify</value>
+                <value>view</value>
+                <value>viewPlain</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="defaultDomainPermission" class="pl.nask.crs.app.authorization.permissions.DefaultAccessPermission">
+        <constructor-arg value="defaultDomainPermission" />
+        <constructor-arg ref="defaultDomainOperations" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <property name="domainDAO" ref="domainDAO" />
+    </bean>
+
+    <bean id="customerDomainOperations" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="customerDomainOperations" />
+        <constructor-arg value="pl.nask.crs.app.domains.DomainAppService" />
+        <constructor-arg>
+            <list>
+                <value>checkAvailability</value>
+                <value>checkPayAvailable</value>
+                <value>edit</value>
+                <value>enterVoluntaryNRP</value>
+                <value>findExtended</value>
+                <value>findTransferredAwayDomains</value>
+                <value>findTransferredInDomains</value>
+                <value>getAll</value>
+                <value>isEventValid</value>
+                <value>modifyRenewalMode</value>
+                <value>removeFromVoluntaryNRP</value>
+                <value>revertToBillable</value>
+                <value>save</value>
+                <value>search</value>
+                <value>updateHolderType</value>
+                <value>validateDomainToModify</value>
+                <value>view</value>
+                <value>viewPlain</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="resellerDomainPermission"
+        class="pl.nask.crs.app.authorization.permissions.ResellerPermission">
+        <constructor-arg value="resellerDomainPermission" />
+        <constructor-arg ref="customerDomainOperations" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <property name="domainDAO" ref="domainDAO" />
+    </bean>
+
+    <bean id="directRegistrarDomainPermission"
+        class="pl.nask.crs.app.authorization.permissions.DirectRegistrarPermission">
+        <constructor-arg value="directRegistrarDomainPermission" />
+        <constructor-arg ref="customerDomainOperations" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <property name="domainDAO" ref="domainDAO" />
+    </bean>
+
+    <bean id="domainViewPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="domainViewPermission" />
+        <constructor-arg value="pl.nask.crs.app.domains.DomainAppService" />
+        <constructor-arg>
+            <list>
+                <value>getAll</value>
+                <value>getRelatedDomains</value>
+                <value>isEventValid</value>
+                <value>search</value>
+                <value>searchFullWithLockingActive</value>
+                <value>view</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="domainEditPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="domainEditPermission" />
+        <constructor-arg value="pl.nask.crs.app.domains.DomainAppService" />
+        <constructor-arg>
+            <list>
+                <value>edit</value>
+                <value>save</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="domainHostmasterPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="domainAdditionalStaffPermission" />
+        <constructor-arg value="pl.nask.crs.app.domains.DomainAppService" />
+        <constructor-arg>
+            <list>
+                <value>enterVoluntaryNRP</value>
+                <value>removeFromVoluntaryNRP</value>
+                <value>sendAuthCodeByEmail</value>
+                <value>updateHolderType</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="domainHostmasterLeadPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="manageLockingPermission" />
+        <constructor-arg value="pl.nask.crs.app.domains.DomainAppService" />
+        <constructor-arg>
+            <list>
+                <value>bulkExportAuthCodes</value>
+                <value>lock</value>
+                <value>sendWhoisDataEmail</value>
+                <value>unlock</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="manageLockingServicePermission" class="pl.nask.crs.user.permissions.NamedPermission">
+        <constructor-arg value="manageLockingServicePermission" />
+        <constructor-arg
+            value="pl.nask.crs.app.domains.DomainAppService.rollLockRenewalDates" />
+    </bean>
+
+    <!-- user permissions --><bean id="defaultUserInfoPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="defaultUserInfoPermission" />
+        <constructor-arg value="pl.nask.crs.app.users.UserAppService" />
+        <constructor-arg>
+            <list>
+                <value>changeTfa</value>
+                <value>getUserLevel</value>
+                <value>isTfaUsed</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="userViewPermission" class="pl.nask.crs.user.permissions.NamedPermission">
+        <constructor-arg value="userViewPermission" />
+        <constructor-arg value="pl.nask.crs.app.users.UserAppService.getUser" />
+    </bean>
+
+    <bean id="userHistoryPermission" class="pl.nask.crs.user.permissions.NamedPermission">
+        <constructor-arg value="userHistoryPermission" />
+        <constructor-arg value="pl.nask.crs.app.users.UserAppService.getHistory" />
+    </bean>
+
+    <!-- email permissions -->
+    <bean id="emailTemplateViewPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="emailTemplateViewPermission" />
+        <constructor-arg value="pl.nask.crs.app.email.EmailTemplateAppService" />
+        <constructor-arg>
+            <list>
+                <value>get</value>
+                <value>search</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="emailTemplateEditPermission" class="pl.nask.crs.user.permissions.NamedPermission">
+        <constructor-arg value="emailTemplateEditPermission" />
+        <constructor-arg value="pl.nask.crs.app.email.EmailTemplateAppService.saveEditableFields" />
+    </bean>
+
+    <bean id="emailDisablerPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="emailDisablerPermission" />
+        <constructor-arg value="pl.nask.crs.app.emaildisabler.EmailDisablerAppService" />
+        <constructor-arg>
+            <list>
+                <value>getAllFor</value>
+                <value>getAllOfEmailGroup</value>
+                <value>getAllOfTemplate</value>
+                <value>modifySuppressionMode</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="emailGroupViewPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="emailGroupViewPermission" />
+        <constructor-arg value="pl.nask.crs.app.email.EmailGroupAppService" />
+        <constructor-arg>
+            <list>
+                <value>get</value>
+                <value>search</value>
+                <value>getAllGroups</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="emailGroupEditPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="emailGroupEditPermission" />
+        <constructor-arg value="pl.nask.crs.app.email.EmailGroupAppService" />
+        <constructor-arg>
+            <list>
+                <value>create</value>
+                <value>delete</value>
+                <value>update</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <!-- common permissions -->
+    <bean id="defaultCommonOperations" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="defaultCommonOperations" />
+        <constructor-arg value="pl.nask.crs.app.commons.CommonAppService" />
+        <constructor-arg>
+            <list>
+                <value>modifyNameservers</value>
+                <value>reauthoriseTransaction</value>
+                <value>sendAuthCodeByEmail</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="defaultCommonPermission"
+        class="pl.nask.crs.app.authorization.permissions.DefaultAccessPermission">
+        <constructor-arg value="defaultCommonPermission" />
+        <constructor-arg ref="defaultCommonOperations" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <property name="domainDAO" ref="domainDAO" />
+        <property name="ticketSearchService" ref="ticketSearchService" />
+    </bean>
+
+    <bean id="customerCommonOperations" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="customerCommonOperations" />
+        <constructor-arg value="pl.nask.crs.app.commons.CommonAppService" />
+        <constructor-arg>
+            <list>
+                <value>cancelTicketAsOwner</value>
+                <value>generateOrProlongAuthCode</value>
+                <value>getOwnerTypeByName</value>
+                <value>getOwnerTypes</value>
+                <value>isTransferPossible</value>
+                <value>modifyDomain</value>
+                <value>registerDomain</value>
+                <value>transfer</value>
+                <value>verifyAuthCode</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="resellerCommonPermission" class="pl.nask.crs.app.authorization.permissions.ResellerPermission">
+        <constructor-arg value="resellerCommonPermission" />
+        <constructor-arg ref="customerCommonOperations" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <property name="domainDAO" ref="domainDAO" />
+        <property name="ticketSearchService" ref="ticketSearchService" />
+    </bean>
+
+    <bean id="directRegistrarCommonPermission"
+    class="pl.nask.crs.app.authorization.permissions.DirectRegistrarPermission">
+        <constructor-arg value="directRegistrarCommonPermission" />
+        <constructor-arg ref="customerCommonOperations" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <property name="domainDAO" ref="domainDAO" />
+        <property name="ticketSearchService" ref="ticketSearchService" />
+    </bean>
+
+    <bean id="generateAuthCodePermission" class="pl.nask.crs.user.permissions.NamedPermission">
+        <constructor-arg value="generateAuthCodePermission" />
+        <constructor-arg value="pl.nask.crs.app.commons.CommonAppService.generateOrProlongAuthCode" />
+    </bean>
+
+    <bean id="searchPermission" class="pl.nask.crs.user.permissions.NamedPermission">
+        <constructor-arg value="searchPermission" />
+        <constructor-arg value="pl.nask.crs.app.AppSearchService.search" />
+    </bean>
+
+    <bean id="domainReportsPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="domainReportsPermission" />
+        <constructor-arg>
+            <list>
+                <value>pl.nask.crs.app.domains.DomainAppService.findDeletedDomains</value>
+                <value>pl.nask.crs.app.domains.DomainAppService.findDomainAutorenewals</value>
+                <value>pl.nask.crs.app.domains.DomainAppService.searchFull</value>
+                <value>pl.nask.crs.app.reports.ReportsAppService.findTotalDomains</value>
+                <value>pl.nask.crs.app.reports.ReportsAppService.findTotalDomainsPerClass</value>
+                <value>pl.nask.crs.app.reports.ReportsAppService.findTotalDomainsPerDate</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ticketReportsPermission" class="pl.nask.crs.user.permissions.NamedPermission">
+        <constructor-arg value="ticketReportsPermission" />
+        <constructor-arg
+            value="pl.nask.crs.app.reports.ReportsAppService.search" />
+    </bean>
+
+    <!-- tech/admin permissions -->
+    <bean id="adminOperations" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="adminOperations" />
+        <constructor-arg>
+            <list>
+                <value>pl.nask.crs.app.commons.CommonAppService.modifyDomain</value>
+                <value>pl.nask.crs.app.commons.CommonAppService.modifyNameservers</value>
+                <value>pl.nask.crs.app.nichandles.NicHandleAppService.createNicHandleOwnAccount</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="adminPermission"
+        class="pl.nask.crs.app.authorization.permissions.DefaultAccessPermission">
+        <constructor-arg value="adminPermission" />
+        <constructor-arg ref="adminOperations" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <property name="domainDAO" ref="domainDAO" />
+        <property name="contactType" value="A" />
+    </bean>
+
+    <!-- payments permissions -->
+    <bean id="customerPaymentOperations" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="customerPaymentOperations" />
+        <constructor-arg value="pl.nask.crs.app.payment.PaymentAppService" />
+        <constructor-arg>
+            <list>
+                <value>findDomainReservations</value>
+                <value>findHistoricalReservations</value>
+                <value>findHistoricalTransactions</value>
+                <value>findOwnReservations</value>
+                <value>findUserInvoices</value>
+                <value>getDomainPricing</value>
+                <value>getInvoiceInfo</value>
+                <value>getNotSettledReservationsTotals</value>
+                <value>getRequestPrice</value>
+                <value>getSettledTransactionHistory</value>
+                <value>getTransactionToReauthorise</value>
+                <value>getVatRate</value>
+                <value>payForDomainRenewal</value>
+                <value>sendEmailWithInvoices</value>
+                <value>viewPdfInvoice</value>
+                <value>viewXmlInvoice</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="resellerPaymentPermission" class="pl.nask.crs.app.authorization.permissions.ResellerPermission">
+        <constructor-arg value="resellerPaymentPermission" />
+        <constructor-arg ref="customerPaymentOperations" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <property name="domainDAO" ref="domainDAO" />
+        <property name="invoiceDAO" ref="invoiceDAO" />
+    </bean>
+
+    <bean id="directRegistrarPaymentPermission"
+        class="pl.nask.crs.app.authorization.permissions.DirectRegistrarPermission">
+        <constructor-arg value="directRegistrarPaymentPermission" />
+        <constructor-arg ref="customerPaymentOperations" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <property name="domainDAO" ref="domainDAO" />
+        <property name="invoiceDAO" ref="invoiceDAO" />
+    </bean>
+
+    <bean id="resellerDepositPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="resellerDepositPermission" />
+        <constructor-arg value="pl.nask.crs.app.payment.PaymentAppService" />
+        <constructor-arg>
+            <list>
+                <value>depositFunds</value>
+                <value>findUserHistoricalDeposits</value>
+                <value>getTopUpHistory</value>
+                <value>viewUserDeposit</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="defaultViewTransactionInfoPermission"
+        class="pl.nask.crs.app.authorization.permissions.DefaultAccessPermission">
+        <constructor-arg value="defaultViewTransactionInfo" />
+        <constructor-arg value="pl.nask.crs.app.payment.PaymentAppService.getTransactionInfo" />
+        <constructor-arg ref="nicHandleSearchService" />
+    </bean>
+
+    <bean id="viewTransactionInfoPermission" class="pl.nask.crs.user.permissions.NamedPermission">
+        <constructor-arg value="viewTransactionInfo" />
+        <constructor-arg value="pl.nask.crs.app.payment.PaymentAppService.getTransactionInfo" />
+    </bean>
+
+    <bean id="getVatRatePermission" class="pl.nask.crs.user.permissions.NamedPermission">
+        <constructor-arg value="getVatRatePermission" />
+        <constructor-arg value="pl.nask.crs.app.payment.PaymentAppService.getVatRate" />
+    </bean>
+
+    <bean id="paymentStaffPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="paymentStaffPermission" />
+        <constructor-arg value="pl.nask.crs.app.payment.PaymentAppService" />
+        <constructor-arg>
+            <list>
+                <value>depositFundsOffline</value>
+                <value>findDeposits</value>
+                <value>findDepositWithHistory</value>
+                <value>findExtendedReservations</value>
+                <value>findInvoices</value>
+                <value>getInvoiceInfo</value>
+                <value>getReadyADPTransactionsReport</value>
+                <value>getValid</value>
+                <value>getVatCategories</value>
+                <value>viewDeposit</value>
+                <value>viewMergedInvoices</value>
+                <value>viewPdfInvoice</value>
+                <value>viewXmlInvoice</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="correctDepositsPermission" class="pl.nask.crs.user.permissions.NamedPermission">
+        <constructor-arg value="correctDepositsPermission" />
+        <constructor-arg value="pl.nask.crs.app.payment.PaymentAppService.correctDeposit" />
+    </bean>
+
+    <bean id="managePricingPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="managePricingPermission" />
+        <constructor-arg value="pl.nask.crs.app.payment.PaymentAppService" />
+        <constructor-arg>
+            <list>
+                <value>addPrice</value>
+                <value>addVatRate</value>
+                <value>findAllPrices</value>
+                <value>getPrice</value>
+                <value>getValid</value>
+                <value>getVatCategories</value>
+                <value>invalidate</value>
+                <value>modifyPrice</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="viewVatCategoriesPermission" class="pl.nask.crs.user.permissions.NamedPermission">
+        <constructor-arg value="viewVatCategoriesPermission" />
+        <constructor-arg value="pl.nask.crs.app.payment.PaymentAppService.getVatCategories" />
+    </bean>
+
+    <!-- authentication permissions -->
+    <bean id="switchPermission" class="pl.nask.crs.user.permissions.NamedPermission">
+        <constructor-arg value="switchPermission" />
+        <constructor-arg value="pl.nask.crs.security.authentication.WsAuthenticationService.switchUser" />
+    </bean>
+
+    <bean id="authenticationPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="authenticationPermission" />
+        <constructor-arg value="pl.nask.crs.security.authentication.WsAuthenticationService" />
+        <constructor-arg>
+            <list>
+                <value>getCompleteUser</value>
+                <value>isUserSwitched</value>
+                <value>logout</value>
+                <value>unswitch</value>
+                <value>validateAndRefreshToken</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="configurationManagementPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="configurationManagementPermission" />
+        <constructor-arg value="pl.nask.crs.app.config.ConfigAppService" />
+        <constructor-arg>
+            <list>
+                <value>createEntry</value>
+                <value>getEntries</value>
+                <value>getEntry</value>
+                <value>updateEntry</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="bulkTransferPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="bulkTransferPermission" />
+        <constructor-arg value="pl.nask.crs.app.domains.BulkTransferAppService" />
+        <constructor-arg>
+            <list>
+                <value>addDomains</value>
+                <value>closeTransferRequest</value>
+                <value>createBulkTransferProcess</value>
+                <value>findTransfers</value>
+                <value>forceCloseTransferRequest</value>
+                <value>getTransferRequest</value>
+                <value>removeDomain</value>
+                <value>transferAll</value>
+                <value>transferValid</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <!-- document upload permissions -->
+    <bean id="documentManagementPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="documentManagementPermission" />
+        <constructor-arg value="pl.nask.crs.app.document.DocumentAppService" />
+        <constructor-arg>
+            <list>
+                <value>add</value>
+                <value>deleteDocumentFile</value>
+                <value>documentFileExists</value>
+                <value>findDocuments</value>
+                <value>get</value>
+                <value>getNewDocuments</value>
+                <value>getPath</value>
+                <value>update</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="documentUploadPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="documentUploadPermission" />
+        <constructor-arg value="pl.nask.crs.app.document.DocumentAppService" />
+        <constructor-arg>
+            <list>
+                <value>getDocumentSettings</value>
+                <value>handleUpload</value>
+                <value>handleMailUpload</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <!-- scheduler permissions -->
+    <bean id="schedulerPermissions" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="schedulerPermissions" />
+        <constructor-arg value="pl.nask.crs.scheduler.SchedulerCron" />
+        <constructor-arg>
+            <list>
+                <value>addJobConfig</value>
+                <value>removeJobConfig</value>
+                <value>modifyJobConfig</value>
+                <value>findJobs</value>
+                <value>findJobsHistory</value>
+                <value>getJobConfig</value>
+                <value>getJobConfigs</value>
+                <value>start</value>
+                <value>stop</value>
+                <value>reload</value>
+                <value>invoke</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="schedulerJobsRunningPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="schedulerJobsRunningPermission" />
+        <constructor-arg>
+            <list>
+                <value>pl.nask.crs.app.commons.CommonAppService.cleanupTicket</value>
+                <value>pl.nask.crs.app.dnscheck.DnsNotificationAppService.sendNotifications</value>
+                <value>pl.nask.crs.app.domains.DomainAppService.authCodeCleanup</value>
+                <value>pl.nask.crs.app.domains.DomainAppService.authCodePortalCleanup</value>
+                <value>pl.nask.crs.app.domains.DomainAppService.findDomainsToAuthCodeCleanup</value>
+                <value>pl.nask.crs.app.domains.DomainAppService.findDomainsToAuthCodePortalCleanup</value>
+                <value>pl.nask.crs.app.domains.DomainAppService.runDeleteProcess</value>
+                <value>pl.nask.crs.app.domains.DomainAppService.runDeletionDatePasses</value>
+                <value>pl.nask.crs.app.domains.DomainAppService.runNotificationProcess</value>
+                <value>pl.nask.crs.app.domains.DomainAppService.runRenewalDatePasses</value>
+                <value>pl.nask.crs.app.domains.DomainAppService.runSuspensionDatePasses</value>
+                <value>pl.nask.crs.app.invoicing.InvoicingAppService.setTransactionStartedSettlement</value>
+                <value>pl.nask.crs.app.invoicing.InvoicingAppService.settleTransaction</value>
+                <value>pl.nask.crs.app.invoicing.InvoicingAppService.generateInvoice</value>
+                <value>pl.nask.crs.app.invoicing.InvoicingAppService.invalidateTransactionIfNeeded</value>
+                <value>pl.nask.crs.app.nichandles.NicHandleAppService.cleanupLoginAttempts</value>
+                <value>pl.nask.crs.app.nichandles.NicHandleAppService.cleanupResetPassword</value>
+                <value>pl.nask.crs.app.nichandles.NicHandleAppService.removeDeletedNichandles</value>
+                <value>pl.nask.crs.app.payment.PaymentAppService.autorenewAll</value>
+                <value>pl.nask.crs.app.payment.PaymentAppService.cleanupTransaction</value>
+                <value>pl.nask.crs.app.payment.PaymentAppService.findAllTransactions</value>
+                <value>pl.nask.crs.app.payment.PaymentAppService.findTransactionsToCleanup</value>
+                <value>pl.nask.crs.app.secondarymarket.SecondaryMarketAppService.cleanupBuyRequest</value>
+                <value>pl.nask.crs.app.secondarymarket.SecondaryMarketAppService.completeSellRequest</value>
+                <value>pl.nask.crs.app.secondarymarket.SecondaryMarketAppService.deleteBuyRequestWithCompletedSale</value>
+                <value>pl.nask.crs.app.secondarymarket.SecondaryMarketAppService.deleteBuyRequestWithExpiredAuthCode</value>
+                <value>pl.nask.crs.app.secondarymarket.SecondaryMarketAppService.findBuyRequestNotifications</value>
+                <value>pl.nask.crs.app.secondarymarket.SecondaryMarketAppService.findBuyRequestsToCleanup</value>
+                <value>pl.nask.crs.app.secondarymarket.SecondaryMarketAppService.findBuyRequestsWithCompletedSales</value>
+                <value>pl.nask.crs.app.secondarymarket.SecondaryMarketAppService.findBuyRequestsWithExpiredAuthCode</value>
+                <value>pl.nask.crs.app.secondarymarket.SecondaryMarketAppService.findSellRequestsToComplete</value>
+                <value>pl.nask.crs.app.secondarymarket.SecondaryMarketAppService.sendBuyRequestNotification</value>
+                <value>pl.nask.crs.app.tickets.TicketAppService.findTicketNotifications</value>
+                <value>pl.nask.crs.app.tickets.TicketAppService.findTicketsToCleanup</value>
+                <value>pl.nask.crs.app.tickets.TicketAppService.sendTicketExpirationEmail</value>
+                <value>pl.nask.crs.app.triplepass.TriplePassAppService.getAdminPassedTickets</value>
+                <value>pl.nask.crs.app.triplepass.TriplePassAppService.performFinancialCheck</value>
+                <value>pl.nask.crs.app.triplepass.TriplePassAppService.performTechnicalCheck</value>
+                <value>pl.nask.crs.app.triplepass.TriplePassAppService.performTicketCancellation</value>
+                <value>pl.nask.crs.app.triplepass.TriplePassAppService.promoteModificationTicket</value>
+                <value>pl.nask.crs.app.triplepass.TriplePassAppService.promoteTicketToDomain</value>
+                <value>pl.nask.crs.app.triplepass.TriplePassAppService.promoteTransferTicket</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <!-- secondary market permissions -->
+    <bean id="secondaryMarketDefaultPermission" class="pl.nask.crs.user.permissions.NamedPermission">
+        <constructor-arg value="secondaryMarketDefaultPermission" />
+        <constructor-arg value="pl.nask.crs.app.secondarymarket.SecondaryMarketAppService.findOwnSellRequests" />
+    </bean>
+
+    <bean id="secondaryMarketCustomerOperations" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="secondaryMarketCustomerOperations" />
+        <constructor-arg value="pl.nask.crs.app.secondarymarket.SecondaryMarketAppService" />
+        <constructor-arg>
+            <list>
+                <value>cancelBuyRequest</value>
+                <value>canDomainBePurchased</value>
+                <value>canDomainBeSold</value>
+                <value>findOwnBuyRequests</value>
+                <value>getBuyRequest</value>
+                <value>getSellRequest</value>
+                <value>modifyBuyRequest</value>
+                <value>registerBuyRequest</value>
+                <value>registerSellRequest</value>
+                <value>verifyAuthCode</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="resellerSecondaryMarketPermission" class="pl.nask.crs.app.authorization.permissions.ResellerPermission">
+        <constructor-arg value="resellerSecondaryMarketPermission" />
+        <constructor-arg ref="secondaryMarketCustomerOperations" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <property name="buyRequestDAO" ref="secondaryMarketBuyRequestDAO" />
+        <property name="sellRequestDAO" ref="secondaryMarketSellRequestDAO" />
+        <property name="domainDAO" ref="domainDAO" />
+    </bean>
+
+    <bean id="directRegistrarSecondaryMarketPermission"
+          class="pl.nask.crs.app.authorization.permissions.DirectRegistrarPermission">
+        <constructor-arg value="directRegistrarSecondaryMarketPermission" />
+        <constructor-arg ref="secondaryMarketCustomerOperations" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <property name="buyRequestDAO" ref="secondaryMarketBuyRequestDAO" />
+        <property name="sellRequestDAO" ref="secondaryMarketSellRequestDAO" />
+        <property name="domainDAO" ref="domainDAO" />
+    </bean>
+
+    <bean id="secondaryMarketStaffViewPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="secondaryMarketStaffViewPermission" />
+        <constructor-arg value="pl.nask.crs.app.secondarymarket.SecondaryMarketAppService" />
+        <constructor-arg>
+            <list>
+                <value>findBuyRequests</value>
+                <value>findHistoricalBuyRequests</value>
+                <value>findHistoricalSellRequests</value>
+                <value>findSellRequests</value>
+                <value>getBuyRequest</value>
+                <value>getBuyRequestHistory</value>
+                <value>getHistoricalBuyRequest</value>
+                <value>getHistoricalSellRequest</value>
+                <value>getSellRequest</value>
+                <value>isBuyRequestUsedInSale</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="secondaryMarketStaffEditPermission" class="pl.nask.crs.user.permissions.MultiNamedPermission">
+        <constructor-arg value="secondaryMarketStaffEditPermission" />
+        <constructor-arg value="pl.nask.crs.app.secondarymarket.SecondaryMarketAppService" />
+        <constructor-arg>
+            <list>
+                <value>acceptBuyRequest</value>
+                <value>cancelSellRequest</value>
+                <value>checkinBuyRequest</value>
+                <value>checkoutBuyRequest</value>
+                <value>invalidateBuyRequest</value>
+                <value>modifyBuyRequestAsHostmaster</value>
+                <value>reassignBuyRequest</value>
+                <value>rejectBuyRequest</value>
+                <value>regenerateAndResendAuthCode</value>
+                <value>saveBuyRequest</value>
+            </list>
+        </constructor-arg>
+    </bean>
+</beans>
+

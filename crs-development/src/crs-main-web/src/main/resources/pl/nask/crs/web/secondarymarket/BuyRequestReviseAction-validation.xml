@@ -1,0 +1,9 @@
+<!DOCTYPE validators PUBLIC "-//OpenSymphony Group//XWork Validator 1.0.2//EN" "http://www.opensymphony.com/xwork/xwork-validator-1.0.2.dtd">
+<validators>
+    <field name="responseText">
+        <field-validator type="stringlength">
+            <param name="maxLength">10000</param>
+            <message>Maximum ${maxLength} characters allowed</message>
+        </field-validator>
+    </field>
+</validators>

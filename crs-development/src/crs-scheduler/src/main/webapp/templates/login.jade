@@ -1,0 +1,18 @@
+doctype html
+html
+  head
+    title Scheduler Monitor
+    link(rel="stylesheet", href="style/bootstrap.min.css")
+    link(rel="stylesheet", href="style/font-awesome.min.css")
+  body
+    .container
+      .row
+        .col-sm-6.col-sm-offset-3.col-xs-12.col-md-4.col-md-offset-4
+          h2 Scheduler Monitor
+          h3 Please sign in
+          if locals.failureMessage
+            div.alert.alert-danger #{failureMessage}
+          form(action = 'schedulerMonitorAuth?action=login', method = 'POST')
+            input.form-control(type='text', placeholder='NicHandle', name='nichandle')
+            input.form-control(type='password', placeholder='Password', name='password')
+            button.btn.btn-lg.btn-block.btn-primary(type='submit') Log in

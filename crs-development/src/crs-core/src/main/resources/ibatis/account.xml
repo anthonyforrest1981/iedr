@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "sql-map-2.dtd">
+
+<sqlMap namespace="account">
+
+    <resultMap id="internalAccount" class="pl.nask.crs.accounts.dao.ibatis.objects.InternalAccount" groupBy="id">
+        <result property="id" column="id" />
+        <result property="name" column="name"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="billingContactId" column="billingContactId"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="billingContactName" column="billingContactName"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="billingContactEmail" column="billingContactEmail"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="billingContactCompanyName" column="billingContactCompanyName" />
+        <result property="billingContactCountry" column="billingContactCountry"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="status" column="status"
+            typeHandler="pl.nask.crs.accounts.dao.ibatis.handlers.AccountStatusHandler" />
+        <result property="webAddress" column="webAddress"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="remark" column="remark"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="creationDate" column="creationDate" />
+        <result property="statusChangeDate" column="statusChangeDate" />
+        <result property="changeDate" column="changeDate" />
+        <!-- feature #2373 -->
+        <result property="agreementSigned" column="agreementSigned"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler" />
+        <result property="ticketEdit" column="ticketEdit"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler" />
+        <result property="segmentId" column="segmentId" />
+    </resultMap>
+
+    <resultMap id="internalRegistrar" class="pl.nask.crs.accounts.InternalRegistrar">
+        <result property="accountName" column="accountName"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="billingNH" column="billingNH"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+    </resultMap>
+
+    <resultMap id="plainAccount" class="pl.nask.crs.accounts.PlainAccount">
+        <result property="id" column="accountId" />
+        <result property="name" column="accountName"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="billingNH" column="accountBillingContactId"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="status" column="accountStatus"
+                typeHandler="pl.nask.crs.accounts.dao.ibatis.handlers.AccountStatusHandler" />
+        <result property="webAddress" column="accountWebAddress"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="remark" column="accountRemark"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="creationDate" column="accountCreationDate" />
+        <result property="statusChangeDate" column="statusChangeDate" />
+        <result property="changeDate" column="accountChangeDate" />
+        <result property="agreementSigned" column="accountAgreementSigned"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler" />
+        <result property="ticketEdit" column="accountTicketEdit"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler" />
+    </resultMap>
+
+    <sql id="selectAccount">
+        SELECT
+        distinct(a.A_Number) AS id,
+        a.A_Name AS name,
+        a.Billing_NH AS billingContactId,
+        nh.NH_Name AS billingContactName,
+        nh.NH_Email AS billingContactEmail,
+        nh.Co_Name AS billingContactCompanyName,
+        c.Name AS billingContactCountry,
+        a.A_Status AS status,
+        a.Web_Address AS webAddress,
+        a.A_Remarks AS remark,
+        a.A_Reg_TS AS creationDate,
+        a.A_Status_TS AS statusChangeDate,
+        a.A_Change_TS AS changeDate,
+        a.Agreement_Signed AS agreementSigned,
+        a.Ticket_Edit AS ticketEdit,
+        a.Segment_ID AS segmentId
+    </sql>
+
+    <sql id="dynamicJoinWhereAccount">
+        <dynamic>
+            <isNotNull property="criteria.domainName">
+                LEFT OUTER JOIN Domain d
+                ON
+                d.A_Number = a.A_Number
+            </isNotNull>
+        </dynamic>
+        ,
+        NicHandle as nh
+        LEFT JOIN Countries as c ON c.Id = nh.Country_Id
+        WHERE
+        a.Billing_NH = nh.Nic_Handle
+        <dynamic>
+            <isNotNull property="criteria.id" prepend="and">
+                a.A_Number = #criteria.id#
+            </isNotNull>
+            <isNotNull property="criteria.nicHandle" prepend="and">
+                a.Billing_NH like
+                #criteria.nicHandle,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringPrefixHandler#
+            </isNotNull>
+            <isNotNull property="criteria.name" prepend="and">
+                a.A_Name like
+                #criteria.name,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringPrefixHandler#
+            </isNotNull>
+            <isNotNull property="criteria.domainName" prepend="and">
+                d.D_Name like
+                #criteria.domainName,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringPrefixHandler#
+            </isNotNull>
+        </dynamic>
+    </sql>
+
+    <select id="getAccountById" resultMap="internalAccount"
+        parameterClass="long">
+        <include refid="selectAccount" />
+        FROM Account AS a,
+        NicHandle AS nh
+        JOIN Countries AS c ON c.Id = nh.Country_Id
+        WHERE
+        a.A_Number=#id#
+        AND
+        a.Billing_NH = nh.Nic_Handle
+    </select>
+
+    <select id="findAccounts" parameterClass="java.util.Map"
+        resultMap="internalAccount">
+        <include refid="selectAccount" />
+        FROM Account as a
+        <include refid="dynamicJoinWhereAccount" />
+        <include refid="common.sortFrag" />
+        <include refid="common.limitFrag" />
+    </select>
+
+    <select id="countTotalSearchResult" parameterClass="java.util.Map"
+        resultClass="int">
+        SELECT COUNT(*)
+        FROM (
+        SELECT distinct(a.A_Number)
+        FROM Account as a
+        <include refid="dynamicJoinWhereAccount" />
+        ) AS CNT
+    </select>
+
+    <insert id="createAccount"
+        parameterClass="pl.nask.crs.accounts.dao.ibatis.objects.InternalAccount">
+        INSERT INTO Account (
+        A_Name,
+        Billing_NH,
+        Web_Address,
+        A_Status,
+        A_Status_TS,
+        A_Reg_TS,
+        Agreement_Signed,
+        Ticket_Edit,
+        A_Change_TS,
+        A_Remarks,
+        Segment_ID
+        ) VALUES (
+        #name,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #billingContactId,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #webAddress,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #status,handler=pl.nask.crs.accounts.dao.ibatis.handlers.AccountStatusHandler#,
+        #statusChangeDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #creationDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #agreementSigned,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#,
+        #ticketEdit,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#,
+        #changeDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #remark,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #segmentId#
+        )
+        <selectKey keyProperty="id" resultClass="long">
+            SELECT
+            LAST_INSERT_ID();
+        </selectKey>
+    </insert>
+
+    <update id="updateAccountUsingHistory" parameterClass="long">
+        UPDATE Account a
+        RIGHT JOIN AccountHist ah ON a.A_Number = ah.A_Number
+        LEFT JOIN NicHandleHist nhh ON nhh.Chng_ID = ah.Billing_NH_Chng_ID
+        SET a.A_Name = ah.A_Name,
+        a.Billing_NH = nhh.Nic_Handle,
+        a.Web_Address = ah.Web_Address,
+        a.A_Status = ah.A_Status,
+        a.A_Status_TS = ah.A_Status_TS,
+        a.A_Reg_TS = ah.A_Reg_TS,
+        a.A_Change_TS = ah.A_Change_TS,
+        a.Agreement_Signed = ah.Agreement_Signed,
+        a.Ticket_Edit = ah.Ticket_Edit,
+        a.A_Remarks = ah.A_Remarks,
+        a.Segment_ID = ah.Segment_ID,
+        a.Chng_ID = ah.Chng_ID
+        WHERE ah.Chng_ID = #changeId#
+    </update>
+
+    <select id="getLockedAccountById" parameterClass="java.lang.Long"
+        resultClass="long">
+        SELECT
+        A.A_Number
+        FROM Account A
+        WHERE
+        A.A_Number = #id#
+        FOR UPDATE
+    </select>
+
+    <select id="getInternalRegistrar" resultMap="internalRegistrar">
+        SELECT
+        A_Name as
+        accountName,
+        Billing_NH as billingNH
+        FROM Account
+        LEFT JOIN Domain
+        ON Domain.A_Number = Account.A_Number
+        WHERE Account.A_Number >
+        100 GROUP BY Account.A_Number HAVING count(*) > 1 order by 1
+    </select>
+</sqlMap>
+

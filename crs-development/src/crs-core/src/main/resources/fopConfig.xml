@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<fop version="1.0">
+    <strict-validation>false</strict-validation>
+    <font-base>fonts/</font-base>
+    <!-- We can't use font cache on production, since it assumes that fonts
+        exist as regular files, while our fonts are archived in a jar and served
+        as streams. -->
+    <use-cache>false</use-cache>
+    <renderers>
+        <renderer mime="application/pdf">
+            <fonts>
+                <font kerning="yes" embed-url="NotoSans-Regular.ttf"
+                    embedding-mode="subset">
+                    <font-triplet name="NotoSans" style="normal"
+                        weight="normal" />
+                </font>
+                <font kerning="yes" embed-url="NotoSans-Bold.ttf"
+                    embedding-mode="subset">
+                    <font-triplet name="NotoSans" style="normal"
+                        weight="bold" />
+                </font>
+                <font kerning="yes" embed-url="NotoSans-Italic.ttf"
+                    embedding-mode="subset">
+                    <font-triplet name="NotoSans" style="italic"
+                        weight="normal" />
+                </font>
+                <font kerning="yes" embed-url="NotoSans-BoldItalic.ttf"
+                    embedding-mode="subset">
+                    <font-triplet name="NotoSans" style="italic"
+                        weight="bold" />
+                </font>
+
+                <font kerning="yes" embed-url="unifont-8.0.01.ttf"
+                    embedding-mode="subset">
+                    <font-triplet name="Unifont" style="normal"
+                        weight="normal" />
+                </font>
+            </fonts>
+        </renderer>
+    </renderers>
+</fop>

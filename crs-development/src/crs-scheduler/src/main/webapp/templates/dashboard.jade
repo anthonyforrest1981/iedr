@@ -1,0 +1,60 @@
+doctype html
+html
+  head
+    title Scheduler Monitor
+    link(rel="stylesheet", href="style/bootstrap.min.css")
+    link(rel="stylesheet", href="style/font-awesome.min.css")
+    link(rel="stylesheet", href="style/scheduler.css")
+  body
+    nav.navbar
+      .container-fluid
+        .navbar-header
+          .navbar-brand IEDR
+        form.navbar-form.navbar-right(method='POST', action='schedulerMonitorAuth?action=logout')
+          button.btn.btn-default(type='submit') Logout
+        ul.nav.navbar-nav.navbar-right
+          li
+            a(href='schedulerStatus') Status
+          li.navbar-text Signed in as #{username}
+    .container
+      .row
+        .col-xs-12
+          .panel(class = schedulerRunning ? "panel-info" : "panel-danger")
+            .panel-heading
+              .btn-toolbar.pull-right
+                .btn-group
+                  a.btn.btn-default(href="#", onclick="window.location = window.location; return false;") Refresh UI
+                form.btn-group.pull-right(method='POST')
+                  button.btn.btn-default(type='submit', formaction='schedulerMonitor?action=reload') RELOAD
+                  if schedulerRunning
+                    button.btn.btn-danger(type='submit', formaction='schedulerMonitor?action=stop') STOP
+                  else
+                    button.btn.btn-primary(type='submit', formaction='schedulerMonitor?action=start') START
+              h4
+                i.fa.fa-cog(class = schedulerRunning ? "fa-spin" : "")
+                |  Scheduler Monitor
+                small= schedulerRunning ? "Running" : "Stopped"
+            table.table.table-hover
+              thead
+                tr
+                  th Job's name
+                  th Runline
+                  th Status
+                  th Start date
+                  th End date
+                  th Actions
+              tbody
+                for job in jobs
+                  tr
+                    td= job.name
+                    td
+                      code= job.runline
+                    td= job.status
+                    td= job.startDate
+                    td= job.endDate
+                    td
+                      form(method='POST', action='schedulerMonitor?action=run&job=#{job.name}')
+                        button.btn.btn-default.btn-xs(type='submit', disabled = !schedulerRunning) RUN
+    if jobRunning
+      script(type='text/javascript').
+        setTimeout(function() { window.location.search = ''; }, 2000);

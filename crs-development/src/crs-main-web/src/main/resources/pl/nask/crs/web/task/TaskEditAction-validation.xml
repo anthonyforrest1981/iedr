@@ -1,0 +1,20 @@
+<!DOCTYPE validators PUBLIC "-//OpenSymphony Group//XWork Validator 1.0.2//EN" "http://www.opensymphony.com/xwork/xwork-validator-1.0.2.dtd">
+<validators>
+    <field name="wrapper.schedule">
+        <field-validator type="requiredstring">
+            <message>You must enter a value for Schedule</message>
+        </field-validator>
+        <field-validator type="stringlength">
+            <param name="maxLength">512</param>
+            <message>Maximum 512 characters allowed</message>
+        </field-validator>
+    </field>
+    <field name="wrapper.runningNicHandle">
+        <field-validator type="requiredstring">
+            <message>You must enter a value for a running Nic Handle</message>
+        </field-validator>
+        <field-validator type="contact">
+            <message>Not a valid Nic Handle</message>
+        </field-validator>
+    </field>
+</validators>

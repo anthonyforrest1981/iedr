@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+    <bean id="secondaryMarketSqlMapClient"
+        class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+        <property name="configLocation" value="classpath:/secondary-market-sql-map-config.xml" />
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <bean id="secondaryMarketPriceDAO"
+        class="pl.nask.crs.secondarymarket.dao.ibatis.SecondaryMarketPriceIBatisDAO">
+        <property name="sqlMapClient" ref="secondaryMarketSqlMapClient" />
+    </bean>
+
+    <bean id="secondaryMarketBuyRequestDAO"
+        class="pl.nask.crs.secondarymarket.dao.ibatis.BuyRequestIBatisDAO">
+        <property name="sqlMapClient" ref="secondaryMarketSqlMapClient" />
+    </bean>
+
+    <bean id="secondaryMarketBuyRequestHistDAO"
+          class="pl.nask.crs.secondarymarket.dao.ibatis.HistoricalBuyRequestIBatisDAO">
+        <property name="sqlMapClient" ref="secondaryMarketSqlMapClient" />
+    </bean>
+
+    <bean id="secondaryMarketSellRequestDAO"
+        class="pl.nask.crs.secondarymarket.dao.ibatis.SellRequestIBatisDAO">
+        <property name="sqlMapClient" ref="secondaryMarketSqlMapClient" />
+    </bean>
+
+    <bean id="secondaryMarketSellRequestHistDAO"
+          class="pl.nask.crs.secondarymarket.dao.ibatis.HistoricalSellRequestIBatisDAO">
+        <property name="sqlMapClient" ref="secondaryMarketSqlMapClient" />
+    </bean>
+
+    <bean id="secondaryMarketBuyRequestNotificationDAO"
+          class="pl.nask.crs.secondarymarket.dao.ibatis.BuyRequestNotificationIBatisDAO">
+        <property name="sqlMapClient" ref="secondaryMarketSqlMapClient" />
+    </bean>
+
+    <bean id="secondaryMarketService"
+        class="pl.nask.crs.secondarymarket.services.impl.SecondaryMarketServiceImpl">
+        <constructor-arg ref="secondaryMarketBuyRequestDAO" />
+        <constructor-arg ref="secondaryMarketBuyRequestHistDAO" />
+        <constructor-arg ref="secondaryMarketSellRequestDAO" />
+        <constructor-arg ref="secondaryMarketSellRequestHistDAO" />
+        <constructor-arg ref="secondaryMarketBuyRequestNotificationDAO" />
+        <constructor-arg ref="paymentService" />
+        <constructor-arg ref="entityService" />
+        <constructor-arg ref="ticketSearchService" />
+        <constructor-arg ref="ticketService" />
+        <constructor-arg ref="accountSearchService" />
+        <constructor-arg ref="domainSearchService" />
+        <constructor-arg ref="domainService" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <constructor-arg ref="nicHandleService" />
+        <constructor-arg ref="dsmMachine" />
+        <constructor-arg ref="emailTemplateSender" />
+        <constructor-arg ref="countryFactory" />
+        <constructor-arg ref="applicationConfig" />
+        <constructor-arg ref="authorizationService" />
+        <property name="documentService" ref="documentsService" />
+    </bean>
+
+</beans>

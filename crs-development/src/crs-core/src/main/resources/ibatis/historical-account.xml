@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "sql-map-2.dtd">
+
+<sqlMap namespace="historicalAccount">
+
+    <resultMap id="internalHistoricalAccount"
+        class="pl.nask.crs.accounts.dao.ibatis.objects.InternalHistoricalAccount"
+        groupBy="histChangeDate">
+        <result property="changeId" column="changeId" />
+        <result property="histChangeDate" column="histChangeDate" />
+        <result property="changedByNicHandle" column="changedByNicHandle"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="id" column="id" />
+        <result property="name" column="name"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="status" column="status"
+            typeHandler="pl.nask.crs.accounts.dao.ibatis.handlers.AccountStatusHandler" />
+        <result property="webAddress" column="webAddress"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="billingContactId" column="billingContactId"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="remark" column="remark"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="creationDate" column="creationDate" />
+        <result property="statusChangeDate" column="statusChangeDate" />
+        <result property="changeDate" column="changeDate" />
+        <result property="agreementSigned" column="agreementSigned"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler" />
+        <result property="ticketEdit" column="ticketEdit"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler" />
+        <result property="segmentId" column="segmentId" />
+    </resultMap>
+
+    <select id="findHistoricalAccount" parameterClass="java.util.Map"
+        resultMap="internalHistoricalAccount">
+        SELECT
+        a.Chng_ID AS changeId,
+        a.Chng_TS AS histChangeDate,
+        a.Chng_NH AS changedByNicHandle,
+        a.A_Number AS id,
+        a.A_Name AS name,
+        a.A_Status AS status,
+        a.Web_Address AS webAddress,
+        nhh.Nic_Handle AS billingContactId,
+        a.A_Remarks AS remark,
+        a.A_Reg_TS AS creationDate,
+        a.A_Status_TS AS statusChangeDate,
+        a.A_Change_TS AS changeDate,
+        a.Agreement_Signed as agreementSigned,
+        a.Ticket_Edit as ticketEdit,
+        a.Segment_ID AS segmentId
+        FROM AccountHist as a
+        LEFT JOIN NicHandleHist nhh ON nhh.Chng_ID = a.Billing_NH_Chng_ID
+        <dynamic prepend="where">
+            <isNotNull property="criteria.id">
+                a.A_Number = #criteria.id#
+            </isNotNull>
+        </dynamic>
+        ORDER BY a.A_Number, a.Chng_ID desc
+    </select>
+
+    <insert id="createHistoricalAccount"
+        parameterClass="pl.nask.crs.accounts.dao.ibatis.objects.InternalHistoricalAccount">
+        INSERT INTO AccountHist (
+        A_Number,
+        A_Name,
+        Billing_NH_Chng_ID,
+        Web_Address,
+        A_Status,
+        A_Status_TS,
+        A_Reg_TS,
+        A_Change_TS,
+        Agreement_Signed,
+        Ticket_Edit,
+        A_Remarks,
+        Segment_ID,
+        Chng_TS,
+        Chng_NH
+        ) VALUES (
+        #id#,
+        #name,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        (SELECT Chng_ID FROM NicHandle WHERE Nic_Handle =
+            #billingContactId,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#),
+        #webAddress,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #status,handler=pl.nask.crs.accounts.dao.ibatis.handlers.AccountStatusHandler#,
+        #statusChangeDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #creationDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #changeDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #agreementSigned,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#,
+        #ticketEdit,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#,
+        #remark,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #segmentId#,
+        #histChangeDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #changedByNicHandle,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#
+        )
+        <selectKey keyProperty="changeId" resultClass="long">
+            SELECT
+            LAST_INSERT_ID() AS changeId
+        </selectKey>
+    </insert>
+
+</sqlMap>
+

@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "sql-map-2.dtd">
+
+<sqlMap namespace="secondary-market-buy-request">
+
+    <resultMap id="plainBuyRequest" class="pl.nask.crs.secondarymarket.PlainBuyRequest">
+        <result property="id" column="buyId"/>
+        <result property="domainName" column="domainName"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler"/>
+        <result property="creatorNH" column="buyCreatorNH"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler"/>
+        <result property="domainHolder" column="domainHolder"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler"/>
+        <result property="remark" column="remark" typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler"/>
+        <result property="hostmasterRemark" column="hostmasterRemark"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler"/>
+        <result property="adminName" column="adminName"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler"/>
+        <result property="adminEmail" column="adminEmail"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler"/>
+        <result property="adminCompanyName" column="adminCompanyName"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler"/>
+        <result property="adminAddress" column="adminAddress"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler"/>
+        <result property="creationDate" column="buyCreationDate"/>
+        <result property="authcode" column="authcode"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler"/>
+        <result property="authcodeCreationDate" column="authcodeDate"/>
+        <result property="checkedOutTo" column="checkedOutTo"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler"/>
+    </resultMap>
+
+    <resultMap id="buyRequestNoTelecoms" extends="plainBuyRequest" class="pl.nask.crs.secondarymarket.BuyRequest">
+        <result property="domainNameFR" column="domainNameFR"
+                typeHandler="pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler"/>
+        <result property="account" resultMap="account.plainAccount"/>
+        <result property="domainHolderFR" column="domainHolderFR"
+                typeHandler="pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler"/>
+        <result property="holderClass" resultMap="entities.entityClass"/>
+        <result property="holderClassFR" column="holderClassFR"
+                typeHandler="pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler"/>
+        <result property="holderCategory" resultMap="entities.entityCategory"/>
+        <result property="holderCategoryFR" column="holderCategoryFR"
+                typeHandler="pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler"/>
+        <result property="adminNameFR" column="adminNameFR"
+                typeHandler="pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler"/>
+        <result property="adminEmailFR" column="adminEmailFR"
+                typeHandler="pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler"/>
+        <result property="adminCompanyNameFR" column="adminCompanyNameFR"
+                typeHandler="pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler"/>
+        <result property="adminAddressFR" column="adminAddressFR"
+                typeHandler="pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler"/>
+        <result property="adminCountry" resultMap="country.countryResult"/>
+        <result property="adminCountryFR" column="adminCountryFR"
+                typeHandler="pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler"/>
+        <result property="adminCounty" resultMap="country.countyResult"/>
+        <result property="adminCountyFR" column="adminCountyFR"
+                typeHandler="pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler"/>
+        <result property="status" column="buyStatus"
+                typeHandler="pl.nask.crs.secondarymarket.dao.ibatis.handlers.BuyRequestStatusHandler"/>
+        <result property="phonesFR" column="phonesFR"
+                typeHandler="pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler"/>
+        <result property="faxesFR" column="faxesFR"
+                typeHandler="pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler"/>
+        <result property="changeDate" column="buyHistChangeDate" />
+    </resultMap>
+
+    <resultMap id="buyRequest" extends="buyRequestNoTelecoms" class="pl.nask.crs.secondarymarket.BuyRequest">
+        <result property="telecoms" column="buyId" select="secondary-market-buy-request.getTelecoms"/>
+    </resultMap>
+
+    <resultMap id="buyRequestTelecom" class="pl.nask.crs.secondarymarket.BuyRequestTelecom">
+        <result property="value" column="telecomNumber"
+                typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler"/>
+        <result property="type" column="telecomType"
+                typeHandler="pl.nask.crs.nichandle.dao.ibatis.handlers.TelecomTypeHandler"/>
+        <result property="order" column="telecomOrder"/>
+    </resultMap>
+
+    <sql id="select">
+        SELECT
+            br.Id as buyId,
+            br.D_Name as domainName,
+            br.D_Name_FR as domainNameFR,
+            br.Creator_NH as buyCreatorNH,
+            Account.A_Number as accountId,
+            Account.A_Name as accountName,
+            Account.Billing_NH as accountBillingContactId,
+            Account.Web_Address as accountWebAddress,
+            Account.A_Status as accountStatus,
+            Account.A_Status_TS as statusChangeDate,
+            Account.A_Reg_TS as accountCreationDate,
+            Account.Agreement_Signed as accountAgreementSigned,
+            Account.Ticket_Edit as accountTicketEdit,
+            Account.A_Change_TS as accountChangeDate,
+            Account.A_Remarks as accountRemark,
+            br.D_Holder as domainHolder,
+            br.D_Holder_FR as domainHolderFR,
+            br.Class_Id as classId,
+            Class.Name as className,
+            br.Class_FR as holderClassFR,
+            br.Category_Id as categoryId,
+            Category.Name as categoryName,
+            br.Category_FR as holderCategoryFR,
+            br.Remark as remark,
+            br.H_Remark as hostmasterRemark,
+            br.Admin_Name as adminName,
+            br.Admin_Name_FR as adminNameFR,
+            br.Admin_Email as adminEmail,
+            br.Admin_Email_FR as adminEmailFR,
+            br.Admin_Co_Name as adminCompanyName,
+            br.Admin_Co_Name_FR as adminCompanyNameFR,
+            br.Admin_Address as adminAddress,
+            br.Admin_Address_FR as adminAddressFR,
+            br.Admin_Country_Id as countryId,
+            br.Admin_Country_FR as adminCountryFR,
+            Countries.Name as countryName,
+            Countries.vat_category as countryVatCategory,
+            br.Admin_County_Id as countyId,
+            br.Admin_County_FR as adminCountyFR,
+            Counties.Name as countyName,
+            br.Admin_Phones_FR as phonesFR,
+            br.Admin_Faxes_FR as faxesFR,
+            br.Created_TS as buyCreationDate,
+            br.Authcode as authcode,
+            br.Authcode_TS as authcodeDate,
+            br.CheckedOutTo_NH as checkedOutTo,
+            br.Status as buyStatus,
+            brh.Chng_TS as buyHistChangeDate
+        FROM SecondaryMarketBuyRequest br
+        LEFT JOIN Account USING (A_Number)
+        LEFT JOIN Countries ON Countries.Id = br.Admin_Country_Id
+        LEFT JOIN Counties ON Counties.Id = br.Admin_County_Id
+        LEFT JOIN Class ON Class.id = br.Class_Id
+        LEFT JOIN Category ON Category.id = br.Category_Id
+        LEFT JOIN NicHandle nh ON nh.Nic_Handle = br.Creator_NH
+        LEFT JOIN SecondaryMarketBuyRequestHist brh ON brh.Chng_ID = br.Chng_ID
+    </sql>
+
+    <select id="get" resultMap="buyRequest">
+        <include refid="secondary-market-buy-request.select"/>
+        WHERE
+        br.Id = #Id#
+    </select>
+
+    <select id="getByAuthcode" resultMap="buyRequest">
+        <include refid="secondary-market-buy-request.select"/>
+        WHERE br.Authcode = #authcode#
+    </select>
+
+    <select id="lock" parameterClass="long" resultClass="long">
+        SELECT br.`Id` as buyId
+        FROM `SecondaryMarketBuyRequest` br
+        WHERE br.`Id` = #Id#
+        FOR UPDATE
+    </select>
+
+    <select id="getTelecoms" resultMap="buyRequestTelecom">
+        SELECT
+            brt.Number as telecomNumber,
+            brt.Type as telecomType,
+            brt.`Order` as telecomOrder
+        FROM SecondaryMarketBuyRequestTelecom brt
+        WHERE BuyRequest_Id = #id#
+    </select>
+
+    <update id="updateUsingHistory" parameterClass="long">
+        UPDATE SecondaryMarketBuyRequest br
+        JOIN SecondaryMarketBuyRequestHist hbr USING(Id)
+        LEFT JOIN AccountHist ah ON hbr.Account_Chng_ID = ah.Chng_ID
+        LEFT JOIN NicHandleHist nhh ON hbr.Creator_NH_Chng_ID = nhh.Chng_ID
+        LEFT JOIN NicHandleHist checkednhh ON hbr.CheckedOutTo_Chng_ID = checkednhh.Chng_ID
+        LEFT JOIN DomainHist dh ON hbr.Domain_Chng_ID = dh.Chng_ID
+        SET
+            br.D_Name = dh.D_Name,
+            br.D_Name_FR = hbr.D_Name_FR,
+            br.Creator_NH = nhh.Nic_Handle,
+            br.A_Number = ah.A_Number,
+            br.D_Holder = hbr.D_Holder,
+            br.D_Holder_FR = hbr.D_Holder_FR,
+            br.Class_Id = hbr.Class_Id,
+            br.Class_FR = hbr.Class_FR,
+            br.Category_Id = hbr.Category_Id,
+            br.Category_FR = hbr.Category_FR,
+            br.Remark = hbr.Remark,
+            br.H_Remark = hbr.H_Remark,
+            br.Admin_Name = hbr.Admin_Name,
+            br.Admin_Name_FR = hbr.Admin_Name_FR,
+            br.Admin_Email = hbr.Admin_Email,
+            br.Admin_Email_FR = hbr.Admin_Email_FR,
+            br.Admin_Co_Name = hbr.Admin_Co_Name,
+            br.Admin_Co_Name_FR = hbr.Admin_Co_Name_FR,
+            br.Admin_Address = hbr.Admin_Address,
+            br.Admin_Address_FR = hbr.Admin_Address_FR,
+            br.Admin_Country_Id = hbr.Admin_Country_Id,
+            br.Admin_Country_FR = hbr.Admin_Country_FR,
+            br.Admin_County_Id = hbr.Admin_County_Id,
+            br.Admin_County_FR = hbr.Admin_County_FR,
+            br.Admin_Phones_FR = hbr.Admin_Phones_FR,
+            br.Admin_Faxes_FR = hbr.Admin_Faxes_FR,
+            br.Created_TS = hbr.Created_TS,
+            br.Authcode = hbr.Authcode,
+            br.Authcode_TS = hbr.Authcode_TS,
+            br.Status = hbr.Status,
+            br.CheckedOutTo_NH = checkednhh.Nic_Handle,
+            br.Chng_ID= hbr.Chng_ID
+        WHERE
+            hbr.Chng_ID = #changeId#
+    </update>
+
+    <insert id="create" parameterClass="pl.nask.crs.secondarymarket.BuyRequest">
+        INSERT INTO SecondaryMarketBuyRequest(
+            D_Name,
+            D_Name_FR,
+            Creator_NH,
+            A_Number,
+            D_Holder,
+            D_Holder_FR,
+            Class_Id,
+            Class_FR,
+            Category_Id,
+            Category_FR,
+            Remark,
+            H_Remark,
+            Admin_Name,
+            Admin_Name_FR,
+            Admin_Email,
+            Admin_Email_FR,
+            Admin_Co_Name,
+            Admin_Co_Name_FR,
+            Admin_Address,
+            Admin_Address_FR,
+            Admin_Country_Id,
+            Admin_Country_FR,
+            Admin_County_Id,
+            Admin_County_FR,
+            Admin_Phones_FR,
+            Admin_Faxes_FR,
+            Created_TS,
+            Authcode,
+            Authcode_TS,
+            CheckedOutTo_NH,
+            Status
+        ) VALUES (
+            #domainName,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+            #domainNameFR,handler=pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler#,
+            #creatorNH,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+            #account.id#,
+            #domainHolder,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+            #domainHolderFR,handler=pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler#,
+            #holderClass.id#,
+            #holderClassFR,handler=pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler#,
+            #holderCategory.id#,
+            #holderCategoryFR,handler=pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler#,
+            #remark,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+            #hostmasterRemark,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+            #adminName,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+            #adminNameFR,handler=pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler#,
+            #adminEmail,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+            #adminEmailFR,handler=pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler#,
+            #adminCompanyName,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+            #adminCompanyNameFR,handler=pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler#,
+            #adminAddress,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+            #adminAddressFR,handler=pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler#,
+            #adminCountry.id#,
+            #adminCountryFR,handler=pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler#,
+            #adminCounty.id#,
+            #adminCountyFR,handler=pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler#,
+            #phonesFR,handler=pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler#,
+            #faxesFR,handler=pl.nask.crs.ticket.dao.ibatis.handlers.FailureReasonHandler#,
+            #creationDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+            #authcode,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+            #authcodeCreationDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+            #checkedOutTo,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+            #status,handler=pl.nask.crs.secondarymarket.dao.ibatis.handlers.BuyRequestStatusHandler#
+        )
+        <selectKey resultClass="long" keyProperty="id">
+            SELECT LAST_INSERT_ID() AS id
+        </selectKey>
+    </insert>
+
+    <insert id="createTelecoms">
+        INSERT INTO SecondaryMarketBuyRequestTelecom (
+            BuyRequest_Id,
+            Number,
+            Type,
+            `Order`
+        ) VALUES
+        <iterate property="telecoms" conjunction=",">
+            (
+            #id#,
+            #telecoms[].value,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+            #telecoms[].type,handler=pl.nask.crs.nichandle.dao.ibatis.handlers.TelecomTypeHandler#,
+            #telecoms[].order#
+            )
+        </iterate>
+    </insert>
+
+    <insert id="createTelecomsUsingHistory" parameterClass="long">
+        INSERT INTO SecondaryMarketBuyRequestTelecom (
+            BuyRequest_Id,
+            Number,
+            Type,
+            `Order`
+        ) SELECT
+            Id,
+            Number,
+            Type,
+            `Order`
+        FROM SecondaryMarketBuyRequestTelecomHist
+        LEFT JOIN SecondaryMarketBuyRequestHist ON BuyRequest_Chng_ID = Chng_ID
+        WHERE Chng_ID = #changeId#
+    </insert>
+
+    <delete id="deleteTelecoms" parameterClass="long">
+        DELETE T.*
+        FROM SecondaryMarketBuyRequestTelecom T
+        LEFT JOIN SecondaryMarketBuyRequestHist H ON T.BuyRequest_Id = H.Id
+        WHERE H.Chng_ID = #buyRequestId#
+    </delete>
+
+    <sql id="findCriteria">
+        <dynamic prepend="WHERE">
+            <isNotNull prepend="and" property="criteria.buyRequestId">
+                br.Id = #criteria.buyRequestId#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.domainHolder">
+                br.D_Holder like
+                #criteria.domainHolder,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringPrefixHandler#
+            </isNotNull>
+            <isNotEmpty prepend="and" property="criteria.statuses">
+                br.Status IN
+                <iterate property="criteria.statuses" open="(" close=")" conjunction=",">
+                    #criteria.statuses[],handler=pl.nask.crs.secondarymarket.dao.ibatis.handlers.BuyRequestStatusHandler#
+                </iterate>
+            </isNotEmpty>
+            <isNotNull prepend="and" property="criteria.domainName">
+                br.D_Name like #criteria.domainName,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringPrefixHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.creationDateFrom">
+                br.Created_TS >=
+                #criteria.creationDateFrom,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.creationDateTo">
+                br.Created_TS <![CDATA[<=]]>
+                #criteria.creationDateTo,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.creatorNH">
+                br.Creator_NH like #criteria.creatorNH,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringPrefixHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.checkedOutTo">
+                br.CheckedOutTo_NH like
+                #criteria.checkedOutTo,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringPrefixHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.buyerAccountId">
+                nh.A_Number = #criteria.buyerAccountId#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.sellerAccountId">
+                br.A_Number = #criteria.sellerAccountId#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.buyerName">
+                br.Admin_Name like
+                #criteria.buyerName,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringPrefixHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.authCodeCreationDateFrom">
+                br.Authcode_TS >=
+                #criteria.authCodeCreationDateFrom,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.authCodeCreationDateTo">
+                br.Authcode_TS <![CDATA[<=]]>
+                #criteria.authCodeCreationDateTo,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+        </dynamic>
+    </sql>
+
+    <select id="find" resultMap="buyRequest">
+        <include refid="secondary-market-buy-request.select"/>
+        <include refid="secondary-market-buy-request.findCriteria"/>
+        <include refid="common.sortFrag"/>
+        <include refid="common.limitFrag"/>
+    </select>
+
+    <select id="count" resultClass="int">
+        SELECT COUNT(*)
+        FROM SecondaryMarketBuyRequest br
+        LEFT JOIN NicHandle nh ON nh.Nic_Handle = br.Creator_NH
+        <include refid="secondary-market-buy-request.findCriteria"/>
+    </select>
+
+    <delete id="delete" parameterClass="long">
+        DELETE FROM SecondaryMarketBuyRequest
+        WHERE Id = #Id#
+    </delete>
+
+    <select id="findCompletedSales" resultClass="long">
+        SELECT br.Id
+        FROM SecondaryMarketBuyRequest br
+        JOIN DomainHist compld ON compld.D_Name = br.D_Name
+        JOIN SecondaryMarketBuyRequestHist complbh ON complbh.Domain_Chng_ID = compld.Chng_ID
+        JOIN SecondaryMarketSellRequestHist complsh ON complsh.BuyRequest_Chng_ID = complbh.Chng_ID
+        WHERE complsh.Status in ('Completed', 'Cancelled')
+        AND complsh.Chng_TS <![CDATA[<=]]>
+            #dateTo,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+        AND complsh.Chng_TS >= br.Created_TS
+        AND NOT EXISTS (SELECT newsh.Id
+            FROM DomainHist newd
+            JOIN SecondaryMarketBuyRequestHist newbh ON newbh.Domain_Chng_ID = newd.Chng_ID
+            JOIN SecondaryMarketSellRequestHist newsh ON newsh.BuyRequest_Chng_ID = newbh.Chng_ID
+            WHERE newsh.Chng_TS >= #dateTo,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            AND newd.D_Name = br.D_Name)
+        GROUP BY br.Id
+    </select>
+
+</sqlMap>

@@ -1,0 +1,5 @@
+/*
+css elements specific for FF
+for color defs see main.css
+*/
+@import url( "../skin-iedr/main.css" );

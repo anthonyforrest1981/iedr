@@ -1,0 +1,35 @@
+<?php
+
+include_once("IEDR-API/config/ClassConfig.php");
+
+class ClientClassConfig extends ClassConfig {
+
+    protected $configArray = array(
+        "ssl_connection" => FALSE,
+        "ssl_strong_verify" => FALSE,
+        "ssl_cert"       => "./client.crt",
+        "ssl_cacert"     => "./ie-testing-CA.pem", // path to trasted certs
+
+        "schemas_dir" => "schemas",
+        "schemas"     => array(
+            "./ieapi-1.8.xsd",
+            "./ieapi-account-1.8.xsd",
+            "./ieapicom-1.8.xsd",
+            "./ieapi-contact-1.8.xsd",
+            "./ieapi-domain-1.8.xsd",
+            "./ieapi-registrantTransferBuyRequest-1.8.xsd",
+            "./ieapi-registrantTransferSellRequest-1.8.xsd",
+            "./ieapi-ticket-1.8.xsd",
+            "./secDNS-1.1.xsd"),
+
+        "autologin" => TRUE,
+        "cookie_file" => "/tmp/iedrapi.cookie",
+
+        "username" => "IDL2-IEDR",
+        "password" => "Passw0rd!",
+        "url"      => "http://crsapi:8080/crs-iedr-api/",
+
+        /* for testing the API */
+        "debug"    => TRUE,
+        "debugXml" => TRUE,);
+}

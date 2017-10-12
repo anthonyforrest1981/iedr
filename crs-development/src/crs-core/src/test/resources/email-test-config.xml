@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+    <bean id="emailSenderAdditionlBcc" class="java.lang.String">
+        <constructor-arg value="additionalBcc@test.test" />
+    </bean>
+
+    <bean id="emailSender"
+        class="pl.nask.crs.commons.email.service.impl.EmailSenderImpl">
+        <constructor-arg value="test@test.test" />
+        <constructor-arg value="test.test" />
+        <constructor-arg value="25" />
+        <constructor-arg value="test" />
+        <constructor-arg value="test" />
+        <constructor-arg ref="emailSenderAdditionlBcc" />
+    </bean>
+
+    <bean id="services" class="pl.nask.crs.app.ServicesRegistryImpl">
+        <property name="topLevelDomainService" ref="topLevelDomainService" />
+        <property name="config" ref="applicationConfig" />
+    </bean>
+</beans>

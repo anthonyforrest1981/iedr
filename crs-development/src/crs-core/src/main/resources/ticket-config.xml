@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+    <bean id="ticketSqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+        <property name="configLocation" value="classpath:/ticket-sql-map-config.xml" />
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <bean id="ticketDAO" class="pl.nask.crs.ticket.dao.ibatis.ConvertingTicketDAO">
+        <constructor-arg ref="ticketIBatisDAO" />
+        <constructor-arg ref="ticketConv" />
+    </bean>
+
+    <bean id="ticketIBatisDAO" class="pl.nask.crs.ticket.dao.ibatis.InternalTicketIBatisDAO">
+        <property name="sqlMapClient" ref="ticketSqlMapClient" />
+        <property name="idGenerator" ref="ticketIdGenerator" />
+    </bean>
+
+    <bean id="historicalTicketIBatisDAO" class="pl.nask.crs.ticket.dao.ibatis.InternalHistoricalTicketIBatisDAO">
+        <property name="sqlMapClient" ref="ticketSqlMapClient" />
+    </bean>
+    <bean id="historicalTicketDAO" class="pl.nask.crs.ticket.dao.ibatis.HistoricalTicketIBatisDAO">
+        <constructor-arg>
+            <ref local="historicalTicketIBatisDAO" />
+        </constructor-arg>
+        <constructor-arg>
+            <bean class="pl.nask.crs.ticket.dao.ibatis.converters.HistoricalTicketConverter">
+                <constructor-arg>
+                    <bean class="pl.nask.crs.ticket.dao.ibatis.converters.TicketConverter">
+                        <constructor-arg ref="internalDomainDAO" />
+                        <property name="evaluateModification" value="true" />
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ticketConv" class="pl.nask.crs.ticket.dao.ibatis.converters.TicketConverter">
+        <constructor-arg ref="internalDomainDAO" />
+        <property name="evaluateModification" value="true" />
+    </bean>
+
+    <bean id="ticketSearchService" class="pl.nask.crs.ticket.services.impl.TicketSearchServiceImpl">
+        <constructor-arg ref="ticketDAO" />
+    </bean>
+
+    <bean id="ticketHistorySearchService" class="pl.nask.crs.ticket.services.impl.TicketHistorySearchServiceImpl">
+        <constructor-arg ref="historicalTicketDAO" />
+    </bean>
+
+    <!--Beans for ticket response package -->
+    <bean id="ticketResponseSqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+        <property name="configLocation" value="classpath:ticket-sql-map-config.xml" />
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <bean id="ticketResponseDAO" class="pl.nask.crs.ticket.dao.ibatis.TicketResponseIBatisDAO">
+        <property name="sqlMapClient" ref="ticketResponseSqlMapClient"></property>
+    </bean>
+
+    <bean id="ticketResponseService" class="pl.nask.crs.ticket.services.impl.TicketResponseServiceImpl">
+        <constructor-arg ref="ticketResponseDAO" />
+    </bean>
+
+    <bean id="ticketService" class="pl.nask.crs.ticket.services.impl.TicketServiceImpl">
+        <constructor-arg ref="ticketDAO" />
+        <constructor-arg ref="historicalTicketDAO" />
+        <constructor-arg ref="domainSearchService" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <constructor-arg ref="ticketSearchService" />
+        <constructor-arg ref="entityService" />
+        <constructor-arg ref="authorizationService" />
+        <property name="servicesRegistry" ref="services" />
+    </bean>
+
+    <bean id="ticketReportsDAO" class="pl.nask.crs.ticket.dao.ibatis.TicketReportsIBatisDAO">
+        <property name="sqlMapClient" ref="ticketSqlMapClient" />
+    </bean>
+
+    <bean id="ticketReportsSearchService" class="pl.nask.crs.ticket.services.impl.TicketReportsSearchServiceImpl">
+        <constructor-arg ref="ticketReportsDAO" />
+    </bean>
+
+    <bean id="dnsNotificationDAO" class="pl.nask.crs.dnscheck.dao.ibatis.DnsNotificationIbatisDAO">
+        <property name="sqlMapClient" ref="commonsSqlMapClient" />
+    </bean>
+
+    <bean id="dnsNotificationService" class="pl.nask.crs.dnscheck.impl.DnsNotificationServiceImpl">
+        <constructor-arg ref="dnsNotificationDAO" />
+        <constructor-arg ref="emailTemplateSender" />
+        <constructor-arg ref="resellerDefaultsService" />
+        <constructor-arg ref="ticketSearchService" />
+        <constructor-arg ref="nicHandleSearchService" />
+        <constructor-arg ref="domainSearchService" />
+    </bean>
+</beans>
+

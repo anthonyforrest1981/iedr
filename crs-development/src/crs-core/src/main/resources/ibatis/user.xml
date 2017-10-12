@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "sql-map-2.dtd">
+
+<sqlMap namespace="user">
+
+    <resultMap id="passwordResetToken" class="pl.nask.crs.token.PasswordResetToken">
+        <result property="nicHandle" column="nicHandle"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="expires" column="expires" />
+        <result property="attemptsLeft" column="attemptsLeft" />
+        <result property="remoteIp" column="remoteIp"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+    </resultMap>
+
+    <resultMap id="user"
+        class="pl.nask.crs.user.dao.ibatis.objects.InternalUser">
+        <result property="username" column="username"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="password" column="password"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="level" column="level" />
+        <result property="internal" column="internal"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler" />
+        <result property="salt" column="salt"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="passwordChangeDate" column="passwordChangeDate" />
+        <result property="forcePasswordChange" column="forcePasswordChange"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler" />
+        <result property="useTwoFactorAuthentication" column="useTwoFactorAuthentication"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler" />
+        <result property="secret" column="secret"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="name" column="name"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.StringHandler" />
+        <result property="permissionNames" column="username" select="user.getUserPermissions" />
+    </resultMap>
+
+    <cacheModel id="usersCache" type="LRU" readOnly="false">
+        <flushInterval hours="1" />
+        <flushOnExecute statement="user.createUser" />
+        <flushOnExecute statement="user.updateUsingHistory" />
+        <property name="size" value="1000" />
+    </cacheModel>
+
+    <sql id="selectUser">
+        SELECT
+        A.Nic_Handle as username,
+        A.NH_Password as password,
+        A.NH_Level as level,
+        A.Internal as internal,
+        A.Salt as salt,
+        A.password_change_TS as passwordChangeDate,
+        A.Force_Password_Change as forcePasswordChange,
+        A.use_two_factor_authentication as useTwoFactorAuthentication,
+        A.secret as secret,
+        NH.NH_Name as name
+        FROM Access A
+        LEFT JOIN NicHandle NH ON A.Nic_Handle = NH.Nic_Handle
+    </sql>
+
+    <select id="getUserForUsername" resultMap="user" parameterClass="string"
+            cacheModel="usersCache">
+        <include refid="selectUser" />
+        WHERE
+        NH.Nic_Handle=#username,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#
+    </select>
+
+    <select id="getUserPermissions" resultMap="common.normalizedString" parameterClass="string">
+        select Permission_Name
+        from UserPermissions
+        where
+        Nic_Handle = #nicHandle,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#
+    </select>
+
+    <sql id="userCriteria">
+        <dynamic prepend="where">
+            <isNotNull prepend="and" property="criteria.isInternal">
+                A.Internal =
+                #criteria.isInternal,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.nhLevelMask">
+                (NH_Level <![CDATA[&]]> #criteria.nhLevelMask#) <![CDATA[>]]> 0
+            </isNotNull>
+        </dynamic>
+    </sql>
+
+    <select id="findUser" parameterClass="java.util.Map" resultMap="user">
+        <include refid="selectUser" />
+        <include refid="userCriteria" />
+        <include refid="common.limitFrag" />
+    </select>
+
+    <select id="countTotalSearchResult" parameterClass="java.util.Map" resultClass="int">
+        SELECT count(*) FROM Access
+        <include refid="userCriteria" />
+    </select>
+
+    <insert id="createUser" parameterClass="pl.nask.crs.user.dao.ibatis.objects.InternalUser">
+        INSERT INTO Access (
+        Nic_Handle,
+        NH_Password,
+        NH_Level,
+        Internal,
+        Salt,
+        password_change_TS,
+        Force_Password_Change,
+        use_two_factor_authentication,
+        secret
+        ) VALUES (
+        #username,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #password,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #level#,
+        #internal,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#,
+        #salt,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #passwordChangeDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #forcePasswordChange,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#,
+        #useTwoFactorAuthentication,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#,
+        #secret,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#
+        )
+    </insert>
+
+    <update id="updateUsingHistory" parameterClass="long">
+        UPDATE Access A
+        LEFT JOIN NicHandle NHH ON NHH.Nic_Handle = A.Nic_Handle
+        LEFT JOIN AccessHist AH ON AH.Nic_Handle_Chng_ID = NHH.Chng_ID
+        SET
+        A.Nic_Handle = NHH.Nic_Handle,
+        A.NH_Password = AH.NH_Password,
+        A.NH_Level = AH.NH_Level,
+        A.Internal = AH.Internal,
+        A.Salt = AH.Salt,
+        A.password_change_TS = AH.password_change_TS,
+        A.Force_Password_Change = AH.Force_Password_Change,
+        A.use_two_factor_authentication = AH.use_two_factor_authentication,
+        A.secret = AH.secret,
+        A.Chng_ID = AH.Chng_ID
+        WHERE AH.Chng_ID = #changeId#
+    </update>
+
+    <insert id="addUserPermission" parameterClass="java.util.Map">
+        insert into UserPermissions (Nic_Handle, Permission_Name)
+        values (
+            #nicHandle,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+            #permissionName,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#
+        )
+    </insert>
+
+    <insert id="removeUserPermission" parameterClass="java.util.Map">
+        delete from UserPermissions
+        where
+        Nic_Handle=#nicHandle,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#
+        and
+        Permission_Name=#permissionName,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#
+    </insert>
+
+    <insert id="addPasswordReset">
+        INSERT INTO ResetPass (
+        Nic_Handle,
+        Unique_ID,
+        Expires_TS,
+        Attempts_Left,
+        Remote_IP
+        ) Values (
+        #nicHandleId,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #hash,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #date,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #attemptsLeft#,
+        #ip,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#
+        )
+    </insert>
+
+    <update id="decreaseTokenAttempts" parameterClass="string">
+        UPDATE ResetPass
+        SET Attempts_Left = GREATEST(0, Attempts_Left - 1)
+        WHERE Unique_ID=#id#
+    </update>
+
+    <update id="invalidateToken" parameterClass="string">
+        UPDATE ResetPass
+        SET valid='NO'
+        WHERE Unique_ID=#id#
+    </update>
+
+    <select id="getToken" resultMap="passwordResetToken" parameterClass="string">
+        select
+        Nic_Handle as nicHandle,
+        Expires_TS as expires,
+        Attempts_Left as attemptsLeft,
+        Remote_IP as remoteIp
+        from ResetPass
+        where Unique_ID = #id# and valid='YES'
+    </select>
+
+    <delete id="cleanupResetPassword">
+        DELETE FROM ResetPass
+        WHERE Expires_TS <![CDATA[<=]]> #date,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+    </delete>
+
+</sqlMap>

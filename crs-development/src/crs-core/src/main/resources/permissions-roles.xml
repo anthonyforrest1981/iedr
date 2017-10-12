@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+    <!-- Permission groups -->
+
+    <bean id="defaultPermissions" class="pl.nask.crs.user.permissions.PermissionGroup">
+        <constructor-arg value="defaultPermissions" />
+        <constructor-arg>
+            <list>
+                <ref bean="saveNewPassOwnNhPermission" />
+                <ref bean="authenticationPermission" />
+                <ref bean="defaultTicketPermissions" />
+                <ref bean="defaultNicHandlePermission" />
+                <ref bean="defaultDomainPermission" />
+                <ref bean="defaultCommonPermission" />
+                <ref bean="defaultUserInfoPermission" />
+                <ref bean="defaultViewTransactionInfoPermission" />
+                <ref bean="secondaryMarketDefaultPermission" />
+                <ref bean="adminPermission" />
+                <ref bean="getVatRatePermission" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="iedrStaffPermissions" class="pl.nask.crs.user.permissions.PermissionGroup">
+        <constructor-arg value="iedrStaffPermissions" />
+        <constructor-arg>
+            <list>
+                <ref bean="logingPermission" />
+                <ref bean="crsLogingPermission" />
+                <ref bean="crsMenuPermission" />
+                <ref bean="searchPermission" />
+                <ref bean="saveNewPassOwnNhPermission" />
+                <ref bean="switchPermission" />
+                <ref bean="accountViewPermission" />
+                <ref bean="nicHandleViewPermission" />
+                <ref bean="ticketViewPermission" />
+                <ref bean="domainViewPermission" />
+                <ref bean="emailTemplateViewPermission" />
+                <ref bean="emailGroupViewPermission" />
+                <ref bean="secondaryMarketStaffViewPermission" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="techPermissions" class="pl.nask.crs.user.permissions.PermissionGroup">
+        <constructor-arg value="techPermissions" />
+        <constructor-arg>
+            <list>
+                <ref bean="iedrStaffPermissions" />
+                <ref bean="accountCreatePermission" />
+                <ref bean="accountSavePermission" />
+                <ref bean="nicHandleStaffPermission" />
+                <ref bean="ticketStaffPermission" />
+                <ref bean="triplePassPermission" />
+                <ref bean="domainEditPermission" />
+                <ref bean="userViewPermission" />
+                <ref bean="userHistoryPermission" />
+                <ref bean="managePricingPermission" />
+                <ref bean="documentManagementPermission" />
+                <ref bean="schedulerLoggingPermission" />
+                <ref bean="schedulerPermissions" />
+                <ref bean="configurationManagementPermission" />
+                <ref bean="bulkTransferPermission" />
+                <ref bean="generateAuthCodePermission" />
+                <ref bean="secondaryMarketStaffEditPermission" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="techLeadPermissions" class="pl.nask.crs.user.permissions.PermissionGroup">
+        <constructor-arg value="techLeadPermissions" />
+        <constructor-arg>
+            <list>
+                <ref bean="techPermissions" />
+                <ref bean="fullAccess" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="hostmasterPermissions" class="pl.nask.crs.user.permissions.PermissionGroup">
+        <constructor-arg value="hostmasterPermissions" />
+        <constructor-arg>
+            <list>
+                <ref bean="iedrStaffPermissions" />
+                <ref bean="accountCreatePermission" />
+                <ref bean="accountSaveNoFlagsPermission" />
+                <ref bean="nicHandleStaffPermission" />
+                <ref bean="ticketStaffPermission" />
+                <ref bean="triplePassPermission" />
+                <ref bean="ticketReportsPermission" />
+                <ref bean="domainEditPermission" />
+                <ref bean="userViewPermission" />
+                <ref bean="userHistoryPermission" />
+                <ref bean="viewVatCategoriesPermission" />
+                <ref bean="documentManagementPermission" />
+                <ref bean="bulkTransferPermission" />
+                <ref bean="domainHostmasterPermission" />
+                <ref bean="secondaryMarketStaffEditPermission" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="hostmasterLeadPermissions" class="pl.nask.crs.user.permissions.PermissionGroup">
+        <constructor-arg value="hostmasterLeadPermissions" />
+        <constructor-arg>
+            <list>
+                <ref bean="hostmasterPermissions" />
+                <ref bean="accountAlterStatusPermission" />
+                <ref bean="accountSavePermission" />
+                <ref bean="domainHostmasterLeadPermission" />
+                <ref bean="viewTransactionInfoPermission" />
+                <ref bean="emailTemplateEditPermission" />
+                <ref bean="emailGroupEditPermission" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="financePermissions" class="pl.nask.crs.user.permissions.PermissionGroup">
+        <constructor-arg value="financePermissions" />
+        <constructor-arg>
+            <list>
+                <ref bean="iedrStaffPermissions" />
+                <ref bean="paymentStaffPermission" />
+                <ref bean="domainReportsPermission" />
+                <ref bean="viewTransactionInfoPermission" />
+                <ref bean="manageLockingServicePermission" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="financeLeadPermissions" class="pl.nask.crs.user.permissions.PermissionGroup">
+        <constructor-arg value="financeLeadPermissions" />
+        <constructor-arg>
+            <list>
+                <ref bean="financePermissions" />
+                <ref bean="correctDepositsPermission" />
+                <ref bean="nicHandleEditPermission" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="customerPermissions" class="pl.nask.crs.user.permissions.PermissionGroup">
+        <constructor-arg value="customerPermissions" />
+        <constructor-arg>
+            <list>
+                <ref bean="logingPermission" />
+                <ref bean="documentUploadPermission" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="registrarCustomerPermissions" class="pl.nask.crs.user.permissions.PermissionGroup">
+        <constructor-arg value="registrarCustomerPermissions" />
+        <constructor-arg>
+            <list>
+                <ref bean="customerPermissions" />
+                <ref bean="apiLogingPermission" />
+                <ref bean="resellerAccountPermission" />
+                <ref bean="resellerNicHandlePermission" />
+                <ref bean="resellerTicketPermission" />
+                <ref bean="resellerDomainPermission" />
+                <ref bean="resellerCommonPermission" />
+                <ref bean="resellerPaymentPermission" />
+                <ref bean="resellerDepositPermission" />
+                <ref bean="resellerSecondaryMarketPermission" />
+                <ref bean="emailDisablerPermission" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="superRegistrarCustomerPermissions" class="pl.nask.crs.user.permissions.PermissionGroup">
+        <constructor-arg value="superRegistrarCustomerPermissions" />
+        <constructor-arg>
+            <list>
+                <ref bean="registrarCustomerPermissions" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="directCustomerPermissions" class="pl.nask.crs.user.permissions.PermissionGroup">
+        <constructor-arg value="directCustomerPermissions" />
+        <constructor-arg>
+            <list>
+                <ref bean="customerPermissions" />
+                <ref bean="directRegistrarNicHandlePermission" />
+                <ref bean="directRegistrarTicketPermission" />
+                <ref bean="directRegistrarDomainPermission" />
+                <ref bean="directRegistrarCommonPermission" />
+                <ref bean="directRegistrarPaymentPermission" />
+                <ref bean="directRegistrarSecondaryMarketPermission" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <!-- User roles -->
+
+    <bean id="technicalLead" class="pl.nask.crs.user.Group">
+        <constructor-arg value="TechnicalLead" />
+        <constructor-arg value="ASD Team" />
+        <constructor-arg type="java.util.Set">
+            <set>
+                <ref bean="techLeadPermissions" />
+            </set>
+        </constructor-arg>
+    </bean>
+
+    <bean id="technical" class="pl.nask.crs.user.Group">
+        <constructor-arg value="Technical" />
+        <constructor-arg value="Technical Services" />
+        <constructor-arg>
+            <set>
+                <ref bean="techPermissions" />
+            </set>
+        </constructor-arg>
+    </bean>
+
+    <bean id="hostmasterLead" class="pl.nask.crs.user.Group">
+        <constructor-arg value="HostmasterLead" />
+        <constructor-arg value="Registration Services Team Lead" />
+        <constructor-arg>
+            <set>
+                <ref bean="hostmasterLeadPermissions" />
+            </set>
+        </constructor-arg>
+    </bean>
+
+    <bean id="hostmaster" class="pl.nask.crs.user.Group">
+        <constructor-arg value="Hostmaster" />
+        <constructor-arg value="Registration Services" />
+        <constructor-arg>
+            <set>
+                <ref bean="hostmasterPermissions" />
+            </set>
+        </constructor-arg>
+    </bean>
+
+    <bean id="finance" class="pl.nask.crs.user.Group">
+        <constructor-arg value="Finance" />
+        <constructor-arg value="Accounts Team" />
+        <constructor-arg>
+            <set>
+                <ref bean="financePermissions" />
+            </set>
+        </constructor-arg>
+    </bean>
+
+    <bean id="financeLead" class="pl.nask.crs.user.Group">
+        <constructor-arg value="FinanceLead" />
+        <constructor-arg value="Accounts Team Lead" />
+        <constructor-arg>
+            <set>
+                <ref bean="financeLeadPermissions" />
+            </set>
+        </constructor-arg>
+    </bean>
+
+    <bean id="registrar" class="pl.nask.crs.user.Group">
+        <constructor-arg value="Registrar" />
+        <constructor-arg value="Registrar" />
+        <constructor-arg>
+            <set>
+                <ref bean="registrarCustomerPermissions" />
+            </set>
+        </constructor-arg>
+    </bean>
+
+    <bean id="direct" class="pl.nask.crs.user.Group">
+        <constructor-arg value="Direct" />
+        <constructor-arg value="Direct Registrant" />
+        <constructor-arg>
+            <set>
+                <ref bean="directCustomerPermissions" />
+            </set>
+        </constructor-arg>
+    </bean>
+
+    <bean id="batch" class="pl.nask.crs.user.Group">
+        <constructor-arg value="Batch" />
+        <constructor-arg value="Batch" />
+        <constructor-arg>
+            <set>
+                <ref bean="schedulerJobsRunningPermission" />
+            </set>
+        </constructor-arg>
+    </bean>
+
+    <bean id="superRegistrar" class="pl.nask.crs.user.Group">
+        <constructor-arg value="SuperRegistrar" />
+        <constructor-arg value="Super Registrar" />
+        <constructor-arg>
+            <set>
+                <ref bean="superRegistrarCustomerPermissions" />
+            </set>
+        </constructor-arg>
+    </bean>
+
+    <bean id="defaultGroup" class="pl.nask.crs.user.Group">
+        <constructor-arg value="Default" />
+        <constructor-arg value="Default" />
+        <constructor-arg>
+            <set>
+                <ref bean="logingPermission" />
+                <ref bean="defaultPermissions" />
+            </set>
+        </constructor-arg>
+    </bean>
+</beans>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "sql-map-2.dtd">
+
+<sqlMap namespace="deleted-domain">
+
+    <resultMap id="deletedDomain" class="pl.nask.crs.domains.DeletedDomain" extends="plain-domain.plainDomain">
+        <result property="billingName" column="billingName"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="country" resultMap="country.countryResult" />
+        <result property="county" resultMap="country.countyResult" />
+    </resultMap>
+
+    <sql id="domainDeletedSql">
+        <include refid="plain-domain.basicDomainSql" />
+        NH.Nic_Handle as billingNH,
+        NH.NH_Name as billingName,
+        A.A_Number as accountId,
+        D.D_Transfer_TS as transferDate,
+        Cntr.Id as countryId,
+        Cntr.Name as countryName,
+        Cntr.vat_category as countryVatCategory,
+        Cnt.Id as countyId,
+        Cnt.Name as countyName
+        from
+        DomainHist as D
+        left join ContactHist as C on (D.D_Name = C.D_Name AND D.Chng_ID = C.Chng_ID AND C.Type = 'Billing')
+        left join NicHandleHist as NH on (NH.Chng_ID = C.Nic_Handle_Chng_ID)
+        left join ContactHist as AC on D.D_Name = AC.D_Name AND D.Chng_ID = AC.Chng_ID AND AC.Type = 'Admin' AND
+                  AC.Nic_Handle_Chng_ID = (SELECT MIN(Nic_Handle_Chng_ID) FROM ContactHist TC
+                                            WHERE TC.D_Name = D.D_Name AND D.Chng_ID = TC.Chng_ID AND TC.Type = 'Admin')
+        left join NicHandleHist as ANH on (ANH.Chng_ID = AC.Nic_Handle_Chng_ID)
+        left join DSM_State as DSM on (D.DSM_State = DSM.State)
+        left join Countries Cntr on (Cntr.Id = ANH.Country_Id)
+        left join Counties Cnt on (Cnt.Id = ANH.County_Id)
+        left join AccountHist as A on (A.Chng_ID = D.Account_Chng_ID)
+        left join Class as CL on (CL.id = D.Class_Id)
+        left join Category as CT on (CT.id = D.Category_Id)
+        left join Subcategory as SCT ON (SCT.id = D.Subcategory_Id)
+        left join Zone_Published as ZP on (D.D_Name = ZP.D_Name)
+        WHERE
+        D.DSM_State = #special.finalDsmState#
+    </sql>
+
+    <sql id="deletedDomainCriteria">
+        <dynamic>
+            <isNotNull prepend="and" property="criteria.billingNH">
+                NH.Nic_Handle like
+                #criteria.billingNH,handler=pl.nask.crs.commons.dao.ibatis.handlers.LooseStringPrefixHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.domainName">
+                D.D_Name like
+                #criteria.domainName,handler=pl.nask.crs.commons.dao.ibatis.handlers.LooseStringPrefixHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.registrationFrom">
+                D.D_Reg_TS >=
+                #criteria.registrationFrom,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.registrationTo">
+                D.D_Reg_TS <![CDATA[<=]]>
+                #criteria.registrationTo,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.renewalFrom">
+                D.D_Ren_Dt >=
+                #criteria.renewalFrom,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.renewalTo">
+                D.D_Ren_Dt <![CDATA[<=]]>
+                #criteria.renewalTo,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.deletionFrom">
+                D.D_Del_Dt >=
+                #criteria.deletionFrom,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.deletionTo">
+                D.D_Del_Dt <![CDATA[<=]]>
+                #criteria.deletionTo,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isEqual prepend="and" property="criteria.type.description" compareValue="Direct">
+                A.A_Number = 1
+            </isEqual>
+            <isEqual prepend="and" property="criteria.type.description" compareValue="Registrar">
+                A.A_Number != 1
+            </isEqual>
+            <isNotNull prepend="and" property="criteria.accountId">
+                A.A_Number = #criteria.accountId#
+            </isNotNull>
+        </dynamic>
+    </sql>
+
+    <select id="countFindDeleted" parameterClass="java.util.Map"
+        resultClass="int">
+        select
+        count(D.D_Name) as CNT
+        from
+        DomainHist as D
+        left join ContactHist as C
+            on (D.D_Name = C.D_Name AND D.Chng_ID = C.Chng_ID AND C.Type = 'Billing')
+        left join NicHandleHist as NH
+            on (NH.Chng_ID = C.Nic_Handle_Chng_ID)
+        left join AccountHist as A
+            on (A.Chng_ID = D.Account_Chng_ID)
+        WHERE
+        D.DSM_State = #special.finalDsmState#
+        <include refid="deletedDomainCriteria" />
+    </select>
+
+    <select id="findDeletedDomains" parameterClass="java.util.Map" resultMap="deletedDomain">
+        <include refid="domainDeletedSql" />
+        <include refid="deletedDomainCriteria" />
+        <include refid="common.sortFrag" />
+        <include refid="common.limitFrag" />
+    </select>
+
+</sqlMap>

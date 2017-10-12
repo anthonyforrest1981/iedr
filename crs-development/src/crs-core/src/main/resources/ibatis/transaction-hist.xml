@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "sql-map-2.dtd">
+
+<sqlMap namespace="transaction-hist">
+
+    <resultMap id="internalTransaction"
+        class="pl.nask.crs.payment.dao.ibatis.objects.InternalTransaction">
+        <result property="id" column="id" />
+        <result property="nicHandleId" column="nicHandleId"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="invoiceId" column="invoiceId" />
+        <result property="invoiceNumber" column="invoiceNumber"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="settlementStarted" column="settlementStarted"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler" />
+        <result property="settlementEnded" column="settlementEnded"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler" />
+        <result property="totalCost" column="totalCost"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.MonetaryBigDecimalHandler" />
+        <result property="totalNetAmount" column="totalNetAmount"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.MonetaryBigDecimalHandler" />
+        <result property="totalVatAmount" column="totalVatAmount"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.MonetaryBigDecimalHandler" />
+        <result property="cancelled" column="cancelled"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler" />
+        <result property="cancelledDate" column="cancelledDate" />
+        <result property="financiallyPassedDate" column="financiallyPassedDate" />
+        <result property="reservations" column="id"
+            select="transaction-hist.getReservationsForTransaction" />
+        <result property="orderId" column="orderId"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="invalidated" column="invalidated"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler" />
+        <result property="invalidatedDate" column="invalidatedDate" />
+        <result property="reauthorisedId" column="reauthorisedId" />
+        <result property="settlementDate" column="settlementDate" />
+        <result property="paymentMethod" column="paymentMethod"
+            typeHandler="pl.nask.crs.payment.dao.ibatis.handlers.PaymentMethodHandler" />
+        <result property="operationType" column="operationType"
+            typeHandler="pl.nask.crs.payment.dao.ibatis.handlers.OperationTypeHandler" />
+    </resultMap>
+
+    <resultMap id="domainInfo" class="pl.nask.crs.payment.DomainInfo">
+        <result property="domainName" column="domainName"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="regDate" column="regDate" />
+        <result property="renDate" column="renDate" />
+        <result property="netAmount" column="netAmount" />
+        <result property="vatAmount" column="vatAmount" />
+        <result property="orderId" column="orderId"
+            typeHandler="pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler" />
+        <result property="operationType" column="operationType"
+            typeHandler="pl.nask.crs.payment.dao.ibatis.handlers.OperationTypeHandler" />
+    </resultMap>
+
+    <select id="getTransactionInfo" parameterClass="long"
+        resultMap="domainInfo">
+        SELECT
+        DH.D_Name as domainName,
+        DH.D_Reg_TS as regDate,
+        DH.D_Ren_Dt as renDate,
+        RH.Amount as netAmount,
+        RH.Vat_Amount as vatAmount,
+        TH.Order_ID as orderId,
+        RH.Operation_Type as operationType
+        FROM TransactionHist TH
+        INNER JOIN ReservationHist RH ON (TH.ID = RH.Transaction_ID)
+        LEFT JOIN DomainHist DH ON (RH.Domain_Chng_ID = DH.Chng_ID)
+        WHERE
+        TH.ID = #id#
+        ORDER BY domainName ASC
+    </select>
+
+    <select id="getTransactionInfoByOrderId" parameterClass="String"
+        resultMap="domainInfo">
+        SELECT
+        DH.D_Name as domainName,
+        DH.D_Reg_TS as regDate,
+        DH.D_Ren_Dt as renDate,
+        RH.Amount as netAmount,
+        RH.Vat_Amount as vatAmount,
+        TH.Order_ID as orderId,
+        RH.Operation_Type as operationType
+        FROM TransactionHist TH
+        INNER JOIN ReservationHist RH ON (TH.ID = RH.Transaction_ID)
+        LEFT JOIN DomainHist DH ON (RH.Domain_Chng_ID = DH.Chng_ID)
+        WHERE
+        TH.Order_ID =
+        #orderId,handler=pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler#
+        ORDER BY domainName ASC
+    </select>
+
+    <insert id="createHistTransaction"
+        parameterClass="pl.nask.crs.payment.dao.ibatis.objects.InternalTransaction">
+        INSERT INTO TransactionHist (
+        ID,
+        Invoice_ID,
+        Settlement_Started,
+        Settlement_Ended,
+        Total_Cost,
+        Total_Net_Amount,
+        Total_Vat_Amount,
+        Cancelled,
+        Cancelled_TS,
+        Financially_Passed_TS,
+        Order_ID,
+        Invalidated,
+        Invalidated_TS,
+        Reauthorised_ID
+        ) VALUES (
+        #id#,
+        #invoiceId#,
+        #settlementStarted,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#,
+        #settlementEnded,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#,
+        #totalCost#,
+        #totalNetAmount#,
+        #totalVatAmount#,
+        #cancelled,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#,
+        #cancelledDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #financiallyPassedDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #orderId,handler=pl.nask.crs.commons.dao.ibatis.handlers.StringHandler#,
+        #invalidated,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#,
+        #invalidatedDate,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#,
+        #reauthorisedId#
+        )
+    </insert>
+
+    <sql id="selectHistTransaction">
+        SELECT DISTINCT
+        TH.ID as id,
+        NHH.Nic_Handle as nicHandleId,
+        TH.Invoice_ID as invoiceId,
+        I.Invoice_Number as invoiceNumber,
+        TH.Order_ID as orderId,
+        TH.Settlement_Started as settlementStarted,
+        TH.Settlement_Ended as settlementEnded,
+        TH.Total_Cost as totalCost,
+        TH.Total_Net_Amount as totalNetAmount,
+        TH.Total_Vat_Amount as totalVatAmount,
+        TH.Cancelled as cancelled,
+        TH.Cancelled_TS as cancelledDate,
+        TH.Financially_Passed_TS as financiallyPassedDate,
+        TH.Invalidated as invalidated,
+        TH.Invalidated_TS as invalidatedDate,
+        TH.Reauthorised_ID as reauthorisedId,
+        RH.Settled_TS as settlementDate,
+        RH.Payment_Method as paymentMethod,
+        RH.Operation_Type as operationType
+        FROM TransactionHist TH
+        left join ReservationHist RH on (RH.Transaction_ID = TH.ID)
+        left join Invoice I on (TH.Invoice_ID = I.ID)
+        left join NicHandleHist NHH on (NHH.Chng_ID = RH.Nic_Handle_Chng_ID)
+    </sql>
+
+    <select id="selectHistTransactionById" resultMap="internalTransaction">
+        <include refid="selectHistTransaction" />
+        WHERE
+        TH.ID = #id#
+        GROUP BY TH.ID
+    </select>
+
+    <select id="selectHistTransactionByOrderId" resultMap="internalTransaction">
+        <include refid="selectHistTransaction" />
+        WHERE
+        TH.Order_ID =
+        #orderId,handler=pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler#
+        GROUP BY TH.Order_ID
+    </select>
+
+    <sql id="transactionHistCriteria">
+        <dynamic prepend="where">
+            <isNotNull prepend="and" property="criteria.billingNH">
+                NHH.Nic_Handle =
+                #criteria.billingNH,handler=pl.nask.crs.commons.dao.ibatis.handlers.LooseStringHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.cancelled">
+                TH.Cancelled =
+                #criteria.cancelled,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.settlementStarted">
+                TH.Settlement_Started =
+                #criteria.settlementStarted,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.settlementEnded">
+                TH.Settlement_Ended =
+                #criteria.settlementEnded,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#
+            </isNotNull>
+            <isEqual prepend="and" property="criteria.readyForSettlement"
+                compareValue="true">
+                TH.Financially_Passed_TS IS NOT NULL
+            </isEqual>
+            <isEqual prepend="and" property="criteria.readyForSettlement"
+                compareValue="false">
+                TH.Financially_Passed_TS IS NULL
+            </isEqual>
+            <isEqual prepend="and" property="criteria.invoiceAssociated"
+                compareValue="true">
+                TH.Invoice_ID IS NOT NULL
+            </isEqual>
+            <isEqual prepend="and" property="criteria.invoiceAssociated"
+                compareValue="false">
+                TH.Invoice_ID IS NULL
+            </isEqual>
+            <isNotNull prepend="and" property="criteria.invalidated">
+                TH.Invalidated =
+                #criteria.invalidated,handler=pl.nask.crs.commons.dao.ibatis.handlers.CharToBooleanHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.paymentMethod">
+                RH.Payment_Method =
+                #criteria.paymentMethod,handler=pl.nask.crs.payment.dao.ibatis.handlers.PaymentMethodHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.settledFrom">
+                RH.Settled_TS >=
+                #criteria.settledFrom,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isNotNull prepend="and" property="criteria.settledTo">
+                RH.Settled_TS <![CDATA[<=]]>
+                #criteria.settledTo,handler=pl.nask.crs.commons.dao.ibatis.handlers.TruncatedDateHandler#
+            </isNotNull>
+            <isEqual prepend="and" property="criteria.reauthorised"
+                compareValue="true">
+                TH.Reauthorised_ID IS NOT NULL
+            </isEqual>
+            <isEqual prepend="and" property="criteria.reauthorised"
+                compareValue="false">
+                TH.Reauthorised_ID IS NULL
+            </isEqual>
+        </dynamic>
+    </sql>
+
+    <select id="countFindHistTransactions" parameterClass="java.util.Map"
+        resultClass="int">
+        SELECT
+        COUNT(DISTINCT(TH.ID)) as cnt
+        FROM TransactionHist TH
+        left join ReservationHist RH on (RH.Transaction_ID = TH.ID)
+        left join NicHandleHist NHH on (NHH.Chng_ID = RH.Nic_Handle_Chng_ID)
+        <include refid="transactionHistCriteria" />
+    </select>
+
+    <select id="findHistTransactions" resultMap="internalTransaction">
+        <include refid="selectHistTransaction" />
+        <include refid="transactionHistCriteria" />
+        GROUP BY TH.ID
+        <include refid="common.sortFrag" />
+        <include refid="common.limitFrag" />
+    </select>
+
+    <select id="getReservationsForTransaction" resultMap="reservation-hist.internalReservation">
+        <include refid="reservation-hist.selectHistReservation" />
+        WHERE
+        RH.Transaction_ID = #id#
+    </select>
+</sqlMap>
