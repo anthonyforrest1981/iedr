@@ -61,7 +61,7 @@
     <module>crs-unzip-servlet</module>
     <module>crs-scheduler</module>
     <module>crs-rpm-build</module>
-    <module>crs-console</module>
+    <!-- TODO: Replace CONSOLE module>crs-console</module -->
     <module>crs-mail-receiver</module>
     <module>crs-selenium-tests</module>
   </modules>
