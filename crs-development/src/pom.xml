@@ -266,7 +266,7 @@
           </dependencies>
           <configuration>
             <driver>org.gjt.mm.mysql.Driver</driver>
-            <url>jdbc:mysql://54.36.100.179:3306/crsdb?useUnicode=true&amp;characterEncoding=UTF-8</url>
+            <url>jdbc:mysql://localhost:3306/crsdb?useUnicode=true&amp;characterEncoding=UTF-8</url>
             <username>crsuser</username>
             <password>crspassword</password>
           </configuration>

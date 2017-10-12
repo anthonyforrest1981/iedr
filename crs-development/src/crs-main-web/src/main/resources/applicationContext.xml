@@ -132,6 +132,7 @@
         scope="prototype">
         <constructor-arg ref="triplePassSupportService" />
         <constructor-arg ref="domainAppService" />
+        <constructor-arg ref="ticketSearchService" />
     </bean>
 
     <bean id="domainChangeHolderType" class="pl.nask.crs.web.domains.DomainChangeHolderTypeAction"
