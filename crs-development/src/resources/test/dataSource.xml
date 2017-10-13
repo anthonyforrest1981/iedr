@@ -10,7 +10,7 @@
         destroy-method="close">
         <property name="driverClassName" value="com.mysql.jdbc.Driver" />
         <property name="url"
-            value="jdbc:mysql://localhost/crsdb?socketTimeout=60000&amp;useUnicode=true&amp;characterEncoding=UTF-8" />
+            value="jdbc:mysql://54.36.100.179/crsdb?socketTimeout=60000&amp;useUnicode=true&amp;characterEncoding=UTF-8" />
         <property name="username" value="crsuser" />
         <property name="password" value="crspassword" />
         <property name="initialSize" value="1" />
