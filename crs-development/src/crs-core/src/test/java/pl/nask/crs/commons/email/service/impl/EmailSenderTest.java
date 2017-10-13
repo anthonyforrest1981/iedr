@@ -2,6 +2,7 @@ package pl.nask.crs.commons.email.service.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +26,7 @@ import org.testng.annotations.Test;
 import pl.nask.crs.commons.email.Email;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 @ContextConfiguration(locations = {"classpath:commons-config-test.xml", "classpath:email-test-config.xml"})
 public class EmailSenderTest extends AbstractTransactionalTestNGSpringContextTests {
@@ -155,7 +157,8 @@ public class EmailSenderTest extends AbstractTransactionalTestNGSpringContextTes
 
     private void testSendingEmailWithUtf8CharactersInBody(boolean isHtml) throws Exception {
         LogMessageEmailSender mockedSender = new LogMessageEmailSender(emailSender);
-        String emailText = "Text with couple of non-ASCII characters: \u00a0\u0b33\u201c\u201d";
+        String startsEmailWith = "Text with couple of non-ASCII characters: ";
+        String emailText = startsEmailWith + "\u00a0\u0b33\u201c\u201d";
         email.setText(emailText);
         email.setHtml(isHtml);
         emailSender.sendEmail(email);
@@ -166,6 +169,13 @@ public class EmailSenderTest extends AbstractTransactionalTestNGSpringContextTes
         assertEquals(content.getContentType(), contentType);
         assertEquals(MimeUtility.getEncoding(content.getDataHandler()), "quoted-printable");
         assertEquals(Arrays.asList(content.getHeader("Content-Transfer-Encoding")), Arrays.asList("quoted-printable"));
-        assertEquals(IOUtils.toString(content.getInputStream()), emailText);
+        // Changed assertion here as there was discrepancy in assertion where e.g. java.lang.AssertionError: expected 
+        // [Text with couple of non-ASCII characters: ????] but found [Text with couple of non-ASCII characters: ???????????]
+        StringWriter writer = new StringWriter();
+	IOUtils.copy(content.getInputStream(), writer, "UTF-8");
+	String convertedString = writer.toString();
+
+	assertTrue(IOUtils.toString(content.getInputStream()).startsWith(startsEmailWith));
+	assertEquals(emailText, convertedString);
     }
 }
