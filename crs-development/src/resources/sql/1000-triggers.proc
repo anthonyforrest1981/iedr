@@ -1,7 +1,7 @@
 mysql>  USE crsdb;
 mysql> 	DELIMIER */
 
-(Copy and paste the following after mysql prompt and return ...)
+(PASTE the following after mysql prompt)
 
 mysql> 	CREATE TRIGGER `BU_Ticket` BEFORE UPDATE ON `Ticket` FOR EACH ROW BEGIN
 		IF NEW.Admin_NH2 = '' THEN
