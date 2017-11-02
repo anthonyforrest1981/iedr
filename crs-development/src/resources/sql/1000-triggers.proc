@@ -1,4 +1,5 @@
 mysql>  USE crsdb;
+
 mysql> 	DELIMIER */
 
 (PASTE the following after mysql prompt)
@@ -8,4 +9,5 @@ mysql> 	CREATE TRIGGER `BU_Ticket` BEFORE UPDATE ON `Ticket` FOR EACH ROW BEGIN
 		SET NEW.Admin_NH2 = NULL;
 		END IF;
 		END*/		
+		
 mysql>  DELIMITER ;
