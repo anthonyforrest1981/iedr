@@ -9,5 +9,3 @@ mysql> 	CREATE TRIGGER `BU_Ticket` BEFORE UPDATE ON `Ticket` FOR EACH ROW BEGIN
 		END IF;
 		END*/		
 mysql>  DELIMITER ;
-
-(exit)
