@@ -1,9 +1,0 @@
-package pl.nask.crs.documents;
-
-public enum UploadStatusEnum {
-    OK,
-    FILE_TOO_BIG,
-    WRONG_FILE_TYPE,
-    UPLOAD_INSUFFICIENT_PERMISSIONS_FOR_DOMAIN,
-    UPLOAD_INSUFFICIENT_PERMISSIONS_FOR_BUY_REQUEST
-}

@@ -1,1 +1,0 @@
-cat reset_data_XBC189.sql reset_data_XNV498.sql reset_data_DIRECT.sql test_data_generation_Direct_Account.sql test_data_generation_XBC189.sql test_data_generation_XNV498.sql > Reset_and_Reload_ALL_test_data.sql
